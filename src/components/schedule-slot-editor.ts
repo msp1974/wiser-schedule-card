@@ -221,7 +221,7 @@ export class ScheduleSlotEditor extends LitElement {
                             value=${this._activeSlot !== -1 ? parseFloat(slots![this._activeSlot!].Setpoint) : 0}
                             unit="°C"
                             .optional=${false}
-                            .disabled=${this._activeSlot !== -1 ? false: true}
+                            .disabled=${this._activeSlot === -1}
                             @value-changed=${(ev: CustomEvent) => {this._updateSetPoint(Number(ev.detail.value));}}
                         >
                         </variable-slider>
