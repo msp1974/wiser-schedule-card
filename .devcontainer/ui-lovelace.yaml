@@ -1,0 +1,9 @@
+resources:
+  - url: http://127.0.0.1:5000/wiser-schedule-card.js
+    type: module
+views:
+  - cards:
+      - type: custom:wiser-schedule-card
+        name: Wiser Schedule Card
+        entity: sun.sun
+        test_gui: true
