@@ -3,13 +3,14 @@ import { LitElement, html, css, TemplateResult, CSSResultGroup, PropertyValues }
 import { property, customElement, state } from 'lit/decorators.js';
 import { CurrentUser, fireEvent } from 'custom-card-helpers';
 import type { WiserScheduleCardConfig, Schedule, WiserEventData, Room, Entities, ScheduleAssignments } from '../types';
-import { allow_edit } from '../helpers';
+import { allow_edit, get_setpoint, isDefined } from '../helpers';
 import { fetchScheduleById, fetchRoomsList, fetchDeviceList, assignSchedule, deleteSchedule, saveSchedule } from '../data/websockets';
 import { SubscribeMixin } from '../components/subscribe-mixin';
 import { UnsubscribeFunc } from 'home-assistant-js-websocket';
 
 import '../components/schedule-slot-editor'
 import { localize } from '../localize/localize';
+import { days } from '../const';
 
 @customElement('wiser-schedule-edit-card')
 export class SchedulerEditCard extends SubscribeMixin(LitElement) {
@@ -23,7 +24,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
     @state() entities: Entities[] = [];
     @state() component_loaded;
     @state() _activeSlot = null;
- 	@state() _activeDay = null;
+ 	  @state() _activeDay = null;
   	@state() editMode = false;
     @state() _current_user?: CurrentUser = this.hass?.user
     @state() _assigning_in_progress = 0;
@@ -74,13 +75,17 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
         return await fetchDeviceList(hass, hub, this.schedule!.SubType)
     }
 
-    protected shouldUpdate(changedProps: PropertyValues): boolean {
+  protected shouldUpdate(changedProps: PropertyValues): boolean {
         if (changedProps.has('schedule_id') || changedProps.has('editMode') ) {
             this.loadData();
             return true
         }
-        if (changedProps.has('force')) { return true }
-        if (changedProps.has('schedule') || changedProps.has('entities') || changedProps.has('editMode') || changedProps.has('_assigning_in_progress') || changedProps.has('_save_in_progress')) { return true }
+      if (changedProps.has('schedule')
+        || changedProps.has('entities')
+        || changedProps.has('editMode')
+        || changedProps.has('_assigning_in_progress')
+        || changedProps.has('_save_in_progress')
+        ) { return true }
         return false;
     }
 
@@ -284,11 +289,11 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 		`;
 	}
 
-	renderSaveScheduleButton(): TemplateResult | void {
-        if (allow_edit(this.hass!, this.config)) {
+  renderSaveScheduleButton(): TemplateResult | void {
+      if (allow_edit(this.hass!, this.config)) {
             return html`
                 <mwc-button class="right"
-					@click=${this.saveClick}
+					        @click=${this.saveClick}
                 >
                 ${this._save_in_progress
                     ? html`<ha-circular-progress active size="small"></ha-circular-progress>`
@@ -366,7 +371,8 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 	scheduleChanged(ev): void {
-		this._tempSchedule = ev.detail.schedule;
+    this._tempSchedule = ev.detail.schedule;
+    this.render()
 	}
 
     static get styles(): CSSResultGroup {
