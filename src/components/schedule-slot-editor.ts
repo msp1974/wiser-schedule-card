@@ -333,7 +333,6 @@ export class ScheduleSlotEditor extends LitElement {
                 detail: { day: this._activeDay, slot: this._activeSlot },
             });
             this.dispatchEvent(myEvent);
-            console.log(target.id)
         }
     }
 
@@ -409,7 +408,6 @@ export class ScheduleSlotEditor extends LitElement {
                 this._activeSlot++;
             }
         }
-        console.log(this.schedule!.ScheduleData[activeDayIndex].slots)
         const myEvent = new CustomEvent('scheduleChanged', {
             detail: { schedule: this.schedule },
         });
