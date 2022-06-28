@@ -109,10 +109,12 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
         const filtered_schedule_list = this.schedule_list!.filter(t => t.Type === schedule_type);
         if (filtered_schedule_list.length > 0) {
             return html`
-                <div class="sub-heading"></div>
-                <div class = "wrapper">
-                    ${filtered_schedule_list.map((schedule) => this.renderScheduleItem(schedule))}
-                </div>
+                <div class="sub-heading">
+                    <fieldset><legend>${schedule_type}</legend>
+                    <div class = "wrapper">
+                        ${filtered_schedule_list.map((schedule) => this.renderScheduleItem(schedule))}
+                    </div>
+                    </fieldset></div>
             `;
         }
         return html``;
@@ -178,8 +180,12 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
         }
     div.sub-heading {
         display:block;
-        border-bottom: 1px solid var(--divider-color, #e8e8e8);
         margin: 5px 0;
+    }
+    div.sub-heading fieldset {
+        border: 1px solid var(--divider-color, #e8e8e8);
+        border-radius: 5px;
+        font-size: small;
     }
 
     div.schedule-item ha-icon {

@@ -10,7 +10,7 @@ import { mdiRadiatorOff, mdiUnfoldMoreVertical } from '@mdi/js';
 
 import type { WiserScheduleCardConfig, ScheduleSlot, Schedule, ScheduleDay } from '../types';
 import { color_map, getLocale, get_end_time, get_setpoint, stringTimeToSeconds } from '../helpers';
-import { HEATING_TYPES, SEC_PER_DAY, day_short_width, days, days_short, DefaultSetpoint } from '../const';
+import { HEATING_TYPES, SEC_PER_DAY, day_short_width, days, days_short, DefaultSetpoint, SetpointUnits } from '../const';
 import './dialog-delete-confirm';
 import { parseRelativeTime, roundTime, stringToTime, timeToString } from '../data/date-time/time';
 import { formatTime, TimeFormat } from '../data/date-time/format_time';
@@ -18,7 +18,7 @@ import { stringToDate } from '../data/date-time/string_to_date';
 import { absToRelTime } from '../data/date-time/relative-time';
 import './variable-slider';
 import './time-bar'
-
+import { localize } from '../localize/localize';
 
 
 @customElement('wiser-schedule-slot-editor')
@@ -30,7 +30,7 @@ export class ScheduleSlotEditor extends LitElement {
 
     @property({ attribute: false }) editMode = false;
 
-    @state() _activeSlot = -1;
+    @state() _activeSlot = -99;
     @state() _activeDay = '';
     @state() _show_short_days = false;
 
@@ -55,13 +55,13 @@ export class ScheduleSlotEditor extends LitElement {
     }
 
     async initialise(): Promise<boolean> {
-        if (this.schedule) {this.schedule_type = this.schedule.Type}
+        if (this.schedule) { this.schedule_type = this.schedule.Type }
         return true
     }
 
     protected shouldUpdate(): boolean {
         if (!this.editMode) {
-            this._activeSlot = -1;
+            this._activeSlot = -99;
             this._activeDay = '';
         }
         return true
@@ -74,12 +74,16 @@ export class ScheduleSlotEditor extends LitElement {
         if (!this.hass || !this.config) return html``;
         return html`
             <div class = "slots-wrapper">
-                ${this.schedule?.ScheduleData.map(day => this.renderDay(day))}
+                ${days.map(day => this.renderDay(
+                    this.schedule?.ScheduleData.filter(rday => rday.day == day)[0]
+                        ? this.schedule?.ScheduleData.filter(rday => rday.day == day)[0]
+                        : { "day": day, "slots": [] }
+                ))}
                 <div class="wrapper" style="display:flex; height:28px;">
                     <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
-                        <time-bar style="width:100%"
+                        <wiser-time-bar style="width:100%"
                             .hass=${this.hass}
-                            ></time-bar>
+                            ></wiser-time-bar>
                     </div>
                 </div>
             </div>
@@ -91,20 +95,20 @@ export class ScheduleSlotEditor extends LitElement {
     }
 
     renderDay(day: ScheduleDay): TemplateResult {
-        const slot: ScheduleSlot = {'Time':'24:00','Setpoint': '0'}
+        const slot: ScheduleSlot = { 'Time': '24:00', 'Setpoint': '0' }
         return html`
             <div class="wrapper">
                 ${this.computeDayLabel(day.day)}
                 <div class="outer" id="${day.day}">
                     <div class="wrapper selectable">
-                        ${day.slots.length > 0 ? day.slots.map((slot, index) => this.renderSlot(slot, index, day)) : this.renderEmptySlot(slot, -1, day)}
+                        ${day.slots.length > 0 ? day.slots.map((slot, index) => this.renderSlot(slot, index, day)) : this.renderEmptySlot(slot, -1, day, true)}
                     </div>
                 </div>
             </div>
         `;
     }
 
-    renderEmptySlot(slot: ScheduleSlot, index: number, day: ScheduleDay) {
+    renderEmptySlot(slot: ScheduleSlot, index: number, day: ScheduleDay, onlySlot = false) {
         const start_time = '00:00'
         const end_time = slot.Time
         const setpoint = get_setpoint(day, index, this.schedule!)
@@ -115,13 +119,15 @@ export class ScheduleSlotEditor extends LitElement {
         const label_class = (width / 100) * fullWidth < 35 ? 'setpoint rotate' : 'setpoint';
         return html`
         <div
-            class="slot previous"
+            id=${day.day + '|-1'}
+            class="slot previous ${this.editMode && onlySlot ? 'selectable':null} ${this._activeSlot == index && this._activeDay == day.day ? 'selected':null}"
             style="width:${Math.floor(width * 1000) / 1000}%; background:${colour};"
             title='${title}'
+            @click=${onlySlot ? this._slotClick : null}
             slot="${-1}"
             >
             <div class="slotoverlay previous">
-                <span class="${label_class}">${this.computeSetpointLabel(get_setpoint(day, -1, this.schedule!))}</span>
+                <span class="${label_class}">${this.computeSetpointLabel(setpoint)}</span>
             </div>
         </div>
     `;
@@ -138,7 +144,7 @@ export class ScheduleSlotEditor extends LitElement {
         const title = 'Start - ' + start_time + '\nEnd - ' + end_time + '\nSetting - ' + this.computeSetpointLabel(setpoint);
 
         return html`
-            ${index == 0 && start_time != '00:00' && start_time !='0:00' ? this.renderEmptySlot(slot, -1, day) : ''}
+            ${index == 0 && start_time != '00:00' && start_time !='0:00' ? this.renderEmptySlot(slot, -1, day, false) : ''}
             <div
                 id=${day.day + '|' + index}
                 class="slot ${this.editMode ? 'selectable':null} ${this._activeSlot == index && this._activeDay == day.day ? 'selected':null}"
@@ -171,30 +177,32 @@ export class ScheduleSlotEditor extends LitElement {
     }
 
     renderAddDeleteButtons(): TemplateResult {
-        //if (this._activeDay) {
-        const slotCount = this._activeDay ? this.schedule!.ScheduleData.filter(day => day.day == this._activeDay)[0].slots.length : 0;
+        let slotCount = 0;
+        if (this.schedule!.ScheduleData.filter(day => day.day == this._activeDay).length > 0) {
+            slotCount = this._activeDay ? this.schedule!.ScheduleData.filter(day => day.day == this._activeDay)[0].slots.length : 0;
+        }
         return html`
                 <div class="wrapper" style="white-space: normal;">
                     <div class="day  ${this._show_short_days ? 'short':''}">&nbsp;</div>
                     <mwc-button
                         id=${'add-before'}
                         @click=${this._addSlot}
-                        ?disabled=${this._activeSlot === -1 || slotCount >= 24}
+                        ?disabled=${this._activeSlot < 0 || slotCount >= 24}
                     >
                         <ha-icon icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
-                        ${'Add Before'}
+                        ${localize('wiser.actions.add_before')}
                     </mwc-button>
                     <mwc-button
                         id=${'add-after'}
                         @click=${this._addSlot}
-                        ?disabled=${this._activeSlot === -1 || slotCount >= 24}
+                        ?disabled=${this._activeSlot < -1 || slotCount >= 24}
                     >
                         <ha-icon icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
-                        ${'Add After'}
+                        ${localize('wiser.actions.add_after')}
                     </mwc-button>
                     <mwc-button
                         @click=${this._removeSlot}
-                        ?disabled=${this._activeSlot === -1 || slotCount <= 1}
+                        ?disabled=${this._activeSlot < 0 || slotCount < 1}
                     >
                         <ha-icon icon="hass:minus-circle-outline" class="padded-right"></ha-icon>
                         ${this.hass!.localize('ui.common.delete')}
@@ -206,42 +214,50 @@ export class ScheduleSlotEditor extends LitElement {
     }
 
     renderSetPointControl(): TemplateResult {
+        let slots = {};
         if (this.editMode) {
-            const slots = this._activeDay ? this.schedule!.ScheduleData.filter(rday => rday.day == this._activeDay)[0].slots : {};
+            if (this.schedule!.ScheduleData.filter(day => day.day == this._activeDay).length > 0) {
+                slots = this._activeDay ? this.schedule!.ScheduleData.filter(rday => rday.day == this._activeDay)[0].slots : {};
+            }
             if (this.schedule_type == 'Heating') {
                 return html`
                     <div class="wrapper" style="white-space: normal;">
-                        <div class="day  ${this._show_short_days ? 'short':''}">&nbsp;</div>
+                        <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
                         <div class="section-header">Temperature</div>
-                        <ha-icon-button class="set-off-button" .path=${mdiRadiatorOff} @click=${() => this._updateSetPoint('-20')}> </ha-icon-button>
-                        <variable-slider
+                        <ha-icon-button
+                            class="set-off-button"
+                            .path=${mdiRadiatorOff}
+                            .disabled=${this._activeSlot < 0 }
+                            @click=${() => this._updateSetPoint('-20')}
+                        > </ha-icon-button>
+                        <wiser-variable-slider
                             min="5"
                             max="30"
                             step="0.5"
-                            value=${this._activeSlot !== -1 ? parseFloat(slots![this._activeSlot!].Setpoint) : 0}
+                            value=${this._activeSlot >= 0 ? parseFloat(slots![this._activeSlot!].Setpoint) : 0}
                             unit="°C"
                             .optional=${false}
-                            .disabled=${this._activeSlot === -1}
-                            @value-changed=${(ev: CustomEvent) => {this._updateSetPoint(Number(ev.detail.value));}}
+                            .disabled=${this._activeSlot < 0 }
+                            @value-changed=${(ev: CustomEvent) => { this._updateSetPoint(Number(ev.detail.value)); }}
                         >
-                        </variable-slider>
+                        </wiser-variable-slider>
                     </div>
                 `;
             } else if (this.schedule_type == 'OnOff') {
                 return html`
                     <div class="wrapper" style="white-space: normal; height: 36px;">
-                        <div class="day  ${this._show_short_days ? 'short':''}">&nbsp;</div>
+                        <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
                         <div class="section-header">State</div>
                         <mwc-button id="state-off"
                             class="state-button active"
-                            .disabled=${this._activeSlot == -1 || slots[this._activeSlot!].Setpoint == 'Off' ? true : false}
+                            .disabled=${this._activeSlot < 0 || slots[this._activeSlot!].Setpoint == 'Off' ? true : false}
                             @click=${() => this._updateSetPoint('Off')}
                             >
                             Off
                         </mwc-button>
                         <mwc-button id="state-on"
                             class="state-button active"
-                            .disabled=${this._activeSlot == -1 || slots[this._activeSlot!].Setpoint == 'On' ? true : false}
+                            .disabled=${this._activeSlot < 0 || slots[this._activeSlot!].Setpoint == 'On' ? true : false}
                             @click=${() => this._updateSetPoint('On')}
                             >
                             On
@@ -251,19 +267,19 @@ export class ScheduleSlotEditor extends LitElement {
             } else if (['Lighting', 'Shutters'].includes(this.schedule_type!)) {
                 return html`
                     <div class="wrapper" style="white-space: normal;">
-                        <div class="day  ${this._show_short_days ? 'short':''}">&nbsp;</div>
+                        <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
                         <div class="section-header">Level</div>
-                        <variable-slider
+                        <wiser-variable-slider
                             min="0"
                             max="100"
                             step="1"
-                            value=${this._activeSlot !== -1 ? parseInt(slots![this._activeSlot!].Setpoint) : 0}
+                            value=${this._activeSlot >= 0 ? parseInt(slots![this._activeSlot!].Setpoint) : 0}
                             unit="%"
                             .optional=${false}
-                            .disabled=${this._activeSlot === -1}
-                            @value-changed=${(ev: CustomEvent) => {this._updateSetPoint(Number(ev.detail.value));}}
+                            .disabled=${this._activeSlot < 0}
+                            @value-changed=${(ev: CustomEvent) => { this._updateSetPoint(Number(ev.detail.value)); }}
                         >
-                        </variable-slider>
+                        </wiser-variable-slider>
                     </div>
                 `;
             }
@@ -310,13 +326,14 @@ export class ScheduleSlotEditor extends LitElement {
                 this._activeSlot = parseInt(slot);
                 this._activeDay = day;
             } else {
-                this._activeSlot = -1;
+                this._activeSlot = -99;
                 this._activeDay = '';
             }
             const myEvent = new CustomEvent('slotClicked', {
                 detail: { day: this._activeDay, slot: this._activeSlot },
             });
             this.dispatchEvent(myEvent);
+            console.log(target.id)
         }
     }
 
@@ -339,45 +356,60 @@ export class ScheduleSlotEditor extends LitElement {
 
     private _addSlot(ev) {
         const add_before = ev.target.id === 'add-before' ? true : false;
-        if (this._activeSlot == -1) return;
+        if (this._activeSlot < -1) return;
+
         const activeDayIndex = days.indexOf(this._activeDay)
-        const activeSlot = this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot];
-        const startTime = stringToTime(activeSlot.Time, this.hass!);
-        let endTime = stringToTime(get_end_time(this.schedule!.ScheduleData[activeDayIndex], this._activeSlot), this.hass!);
-        if (endTime < startTime) endTime += SEC_PER_DAY;
-        const newStop = roundTime(startTime + (endTime - startTime) / 2, this.stepSize);
-        if (add_before) {
+        if (this._activeSlot < 0) {
             this.schedule!.ScheduleData[activeDayIndex].slots = [
-                ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
                 {
                     Time: formatTime(
-                        stringToDate(timeToString(startTime)),
+                        stringToDate(timeToString(stringToTime('06:00', this.hass!))),
                         getLocale(this.hass!)
-                    ).padStart(5,'0'),
+                    ).padStart(5, '0'),
                     Setpoint: DefaultSetpoint[this.schedule_type!],
-                },
-                {
-                    ...this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot!], Time: formatTime(
-                        stringToDate(timeToString(newStop)),
-                        getLocale(this.hass!)
-                    ),
-                },
-                ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(this._activeSlot+1),
+                }
             ];
+            this._activeSlot = 0;
         } else {
-            this.schedule!.ScheduleData[activeDayIndex].slots = [
-                ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot+1),
-                {
-                    Time: formatTime(
-                        stringToDate(timeToString(newStop)),
-                        getLocale(this.hass!)
-                    ).padStart(5,'0'),
-                    Setpoint: DefaultSetpoint[this.schedule_type!],
-                },
-                ...this.schedule!.ScheduleData[activeDayIndex].slots!.slice(this._activeSlot+1),
-            ];
-            this._activeSlot++;
+            const activeSlot = this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot];
+            const startTime = stringToTime(activeSlot.Time, this.hass!);
+            let endTime = stringToTime(get_end_time(this.schedule!.ScheduleData[activeDayIndex], this._activeSlot), this.hass!);
+            if (endTime < startTime) endTime += SEC_PER_DAY;
+            const newStop = roundTime(startTime + (endTime - startTime) / 2, this.stepSize);
+            if (add_before) {
+                this.schedule!.ScheduleData[activeDayIndex].slots = [
+                    ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
+                    {
+                        Time: formatTime(
+                            stringToDate(timeToString(startTime)),
+                            getLocale(this.hass!)
+                        ).padStart(5, '0'),
+                        Setpoint: DefaultSetpoint[this.schedule_type!],
+                    },
+                    {
+                        ...this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot!], Time: formatTime(
+                            stringToDate(timeToString(newStop)),
+                            getLocale(this.hass!)
+                        ),
+                    },
+                    ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(this._activeSlot + 1),
+                ];
+            } else {
+                this.schedule!.ScheduleData[activeDayIndex].slots = [
+                    ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot + 1),
+                    {
+                        Time: formatTime(
+                            stringToDate(timeToString(newStop)),
+                            getLocale(this.hass!)
+                        ).padStart(5, '0'),
+                        Setpoint: DefaultSetpoint[this.schedule_type!],
+                    },
+                    ...this.schedule!.ScheduleData[activeDayIndex].slots!.slice(this._activeSlot + 1),
+                ];
+                this._activeSlot++;
+            }
         }
+        console.log(this.schedule!.ScheduleData[activeDayIndex].slots)
         const myEvent = new CustomEvent('scheduleChanged', {
             detail: { schedule: this.schedule },
         });
@@ -386,7 +418,7 @@ export class ScheduleSlotEditor extends LitElement {
       }
 
     private _removeSlot() {
-        if (this._activeSlot == -1) return;
+        if (this._activeSlot < 0) return;
         const activeDayIndex = days.indexOf(this._activeDay)
         const cutIndex = this._activeSlot!;
         if (cutIndex == 0) {
@@ -606,13 +638,9 @@ export class ScheduleSlotEditor extends LitElement {
     }
 
     computeSetpointLabel(setPoint) {
-        if (this.schedule_type?.toLowerCase() == 'heating') {
-          if (setPoint == -20) { return 'Off' }
-          return setPoint + '°C';
-        } else if(['lighting','shutters','level'].includes(this.schedule_type!.toLowerCase())) {
-          return setPoint + '%';
-        }
-        return setPoint;
+        if (setPoint == 'Unknown') return setPoint;
+        if (this.schedule_type == 'Heating' && setPoint == -20) { return 'Off' }
+        return setPoint + SetpointUnits[this.schedule_type!];
     }
 
 
@@ -697,6 +725,9 @@ export class ScheduleSlotEditor extends LitElement {
             display: block;
             background: repeating-linear-gradient(135deg, rgba(0,0,0,0), rgba(0,0,0,0) 5px, rgba(255,255,255,0.2) 5px, rgba(255,255,255,0.2) 10px);
             border-radius: 5px 0 0 5px;
+            }
+            .previous.selected {
+                border: 2px solid #02d0ff;
             }
             .wrapper.selectable .slot:hover {
             background: rgba(var(--rgb-primary-color), 0.85);

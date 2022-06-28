@@ -3,7 +3,7 @@ import { FrontendTranslationData, HomeAssistant, NumberFormat } from 'custom-car
 
 import hexRgb from 'hex-rgb';
 import { LitElement } from 'lit';
-import { days, SEC_PER_HOUR } from './const';
+import { days, DefaultSetpoint, SEC_PER_HOUR } from './const';
 
 const int = Math.trunc;
 
@@ -59,6 +59,7 @@ export function getGreyToYellow(percent: number): string {
 }
 
 export function color_map(element: LitElement, schedule_type: string, setPoint: string): string {
+  if (setPoint == 'Unknown') return '100,100,100';
     if (schedule_type.toLowerCase() === 'onoff') {
         if (setPoint == 'On') { return hexToRgbString(getCSSVariable(element, '--state-on-color')) }
         return hexToRgbString(getCSSVariable(element, '--state-off-color'))
@@ -96,17 +97,17 @@ export function get_end_time(day: ScheduleDay, index: number): string {
 
 export function find_previous_setpoint(day: ScheduleDay, schedule: Schedule): string {
   const day_order = [
-    ...days.slice(days.indexOf(day.day) + 1),
+    ...days.slice(days.indexOf(day.day)),
     ...days.slice(0, days.indexOf(day.day))
   ].reverse()
   let search_day: string
   for (search_day of day_order) {
     const d = schedule.ScheduleData.filter(rday => rday.day == search_day)[0];
-    if (d.slots.length > 0) {
+    if (d && d.slots.length > 0) {
       return d.slots[d.slots.length - 1].Setpoint
     }
   }
-  return ''
+  return 'Unknown'
 }
 
 export function get_setpoint(day: ScheduleDay, index: number, schedule: Schedule): string {

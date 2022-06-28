@@ -1,14 +1,14 @@
 {
   "common": {
-    "version": "Version",
-    "invalid_configuration": "Invalid configuration"
+    "version": "Déclinaison",
+    "invalid_configuration": "Configuration Invalide"
   },
   "wiser": {
     "actions": {
-      "copy": "Copy",
-      "files": "Files",
-      "add_before": "Add Before",
-      "add_after": "Add After"
+      "copy": "Copie",
+      "files": "Fichier",
+      "add_before": "Ajouter Avant",
+      "add_after": "Ajouter Après"
     },
     "headings": {
       "schedule_actions": "Schedule Actions",

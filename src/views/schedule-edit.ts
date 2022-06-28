@@ -9,6 +9,7 @@ import { SubscribeMixin } from '../components/subscribe-mixin';
 import { UnsubscribeFunc } from 'home-assistant-js-websocket';
 
 import '../components/schedule-slot-editor'
+import { localize } from '../localize/localize';
 
 @customElement('wiser-schedule-edit-card')
 export class SchedulerEditCard extends SubscribeMixin(LitElement) {
@@ -88,7 +89,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 		//<ha-icon-button .path=${mdiClose} @click=${this.backClick}> </ha-icon-button>
         if (!this.hass || !this.config || !this.component_loaded) return html``;
         if (this.schedule  && this.entities) {
-			return html`
+          return html`
             <ha-card>
             <div class="card-header">
                 <div class="name">
@@ -97,13 +98,13 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
             </div>
             <div class="card-content">
                 <div class="schedule-info">
-                    <span class="sub-heading">Schedule Type:</span> ${this.schedule.SubType}
+                    <span class="sub-heading">${localize('wiser.headings.schedule_type')}: </span> ${this.schedule.SubType}
                 </div>
                 <div class="schedule-info">
-                    <span class="sub-heading">Schedule Id:</span> ${this.schedule.Id}
+                    <span class="sub-heading">${localize('wiser.headings.schedule_id')}: </span> ${this.schedule.Id}
                 </div>
                 <div class="schedule-info">
-                    <span class="sub-heading">Schedule Name:</span> ${this.schedule.Name}
+                    <span class="sub-heading">${localize('wiser.headings.schedule_name')}: </span> ${this.schedule.Name}
                 </div>
 				<div class=${this.editMode ? 'mode': ''}>
 					${this.editMode ? 'Edit Mode': null}
@@ -147,17 +148,17 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 			if (allow_edit(this.hass!, this.config)) {
 				return html`
 					<div class="assignment-wrapper">
-						<div class="sub-heading">Schedule Assignment</div>
+						<div class="sub-heading">${localize('wiser.headings.schedule_assignment')}</div>
 						${entities.map(entity => this.renderEntityButton(entity, schedule_entities.map(function(a) {return a.name}).includes(entity.Name)))}
 					</div>
 				`;
 			} else {
 				return html`
 					<div class="assignment-wrapper">
-						<div class="sub-heading">Schedule Assignment</div>
+						<div class="sub-heading">${localize('wiser.headings.schedule_assignment')}</div>
 						${schedule_entities.length > 0 ?
 						entities.filter(entity => schedule_entities.map(function(a) {return a.name}).includes(entity.Name)).map(entity => this.renderEntityLabel(entity)) :
-						html`<span class="assignment-label">(Not Assigned)</span>`
+						html`<span class="assignment-label">${localize('wiser.headings.not_assigned')}</span>`
 						}
 					</div>
 				`;
@@ -179,12 +180,13 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 		`;
 	}
 
-	renderScheduleActionButtonSection(): TemplateResult | void {
+  renderScheduleActionButtonSection(): TemplateResult | void {
+    //${this.renderFilesScheduleButton()}
 		if (this.schedule && !this.editMode) {
 			if (allow_edit(this.hass!, this.config)) {
 				return html`
 					<div class="actions-wrapper">
-						<div class="sub-heading">Schedule Actions</div>
+						<div class="sub-heading">${localize('wiser.headings.schedule_actions')}</div>
 						<div class="wrapper schedule-action-wrapper">
 							${this.renderEditScheduleButton()}
 							${this.renderCopyScheduleButton()}
@@ -252,7 +254,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
         return html`
         <mwc-button
             class="large active"
-            label=${'Copy'}
+            label=${localize('wiser.actions.copy')}
             .disabled=${this.schedule_id == 1000}
             @click=${this.copyClick}
         >
@@ -264,8 +266,19 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 		return html`
 		<mwc-button
 			class="large active"
-			label=${'Edit'}
+			label=${this.hass!.localize('ui.common.edit')}
 			@click=${this.editClick}
+		>
+		</mwc-button>
+		`;
+  }
+
+  renderFilesScheduleButton(): TemplateResult | void {
+		return html`
+		<mwc-button
+			class="large active"
+			label=${localize('wiser.actions.files')}
+			@click=${this.filesClick}
 		>
 		</mwc-button>
 		`;
@@ -308,6 +321,11 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
         const myEvent = new CustomEvent('copyClick');
         this.dispatchEvent(myEvent);
     }
+
+    filesClick(): void {
+      const myEvent = new CustomEvent('filesClick');
+      this.dispatchEvent(myEvent);
+  }
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     async deleteClick(ev): Promise<void> {
@@ -551,9 +569,8 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 		  border-radius: var(--mdc-shape-small, 4px)
         }
 		mwc-button.large {
-			width: 20%;
-			padding: 0px 18px;
-			margin: 0 2px;
+			width: 25%;
+			margin: 2px;
 			max-width: 200px;
 		}
 		mwc-button.right {
