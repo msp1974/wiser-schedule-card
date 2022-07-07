@@ -18,6 +18,7 @@ import './views/schedule-list';
 import './views/schedule-edit';
 import './views/schedule-add';
 import './views/schedule-copy';
+import './views/schedule-rename';
 import './editor';
 
 
@@ -155,6 +156,7 @@ export class WiserScheduleCard extends LitElement {
                 .schedule_id=${this._schedule_id}
                 .schedule_type=${this._schedule_type}
                 @backClick=${this._backClick}
+                @renameClick=${this._renameClick}
                 @editClick=${this._editClick}
                 @copyClick=${this._copyClick}
                 @scheduleDeleted=${this._scheduleDeleted}
@@ -180,6 +182,17 @@ export class WiserScheduleCard extends LitElement {
                 @scheduleCopied=${this._scheduleCopied}
             ></wiser-schedule-copy-card>
         `;
+        } else if (this._view == EViews.ScheduleRename) {
+            return html`
+                <wiser-schedule-rename-card
+                    .hass=${this._hass}
+                    .config=${this.config}
+                    .schedule_id=${this._schedule_id}
+                    .schedule_type=${this._schedule_type}
+                    @backClick=${this._backClick}
+                    @scheduleRenamed=${this._scheduleRenamed}
+                ></wiser-schedule-copy-card>
+            `;
         }
         return html``;
     }
@@ -192,6 +205,10 @@ export class WiserScheduleCard extends LitElement {
 
     private _addScheduleClick() {
         this._view = EViews.ScheduleAdd;
+    }
+
+    private _renameClick() {
+        this._view = EViews.ScheduleRename
     }
 
     private _editClick() {
@@ -219,6 +236,10 @@ export class WiserScheduleCard extends LitElement {
     }
 
     private _scheduleCopied() {
+        this._view = EViews.ScheduleEdit;
+    }
+
+    private _scheduleRenamed() {
         this._view = EViews.ScheduleEdit;
     }
 

@@ -2,15 +2,16 @@
 import { LitElement, html, css, TemplateResult, CSSResultGroup, PropertyValues } from 'lit';
 import { property, customElement, state } from 'lit/decorators.js';
 import { CurrentUser, fireEvent } from 'custom-card-helpers';
-import type { WiserScheduleCardConfig, Schedule, WiserEventData, Room, Entities, ScheduleAssignments } from '../types';
+import type { WiserScheduleCardConfig, Schedule, WiserEventData, Room, Entities, ScheduleAssignments, SunTimes, ScheduleDay, ScheduleSlot } from '../types';
 import { allow_edit, get_setpoint, isDefined } from '../helpers';
-import { fetchScheduleById, fetchRoomsList, fetchDeviceList, assignSchedule, deleteSchedule, saveSchedule } from '../data/websockets';
+import { fetchScheduleById, fetchRoomsList, fetchDeviceList, assignSchedule, deleteSchedule, saveSchedule, fetchSunTimes, showErrorDialog } from '../data/websockets';
 import { SubscribeMixin } from '../components/subscribe-mixin';
 import { UnsubscribeFunc } from 'home-assistant-js-websocket';
 
 import '../components/schedule-slot-editor'
+import '../components/dialog-error'
 import { localize } from '../localize/localize';
-import { days } from '../const';
+import { days, SPECIAL_TIMES, SUPPORT_SPECIAL_TIMES } from '../const';
 
 @customElement('wiser-schedule-edit-card')
 export class SchedulerEditCard extends SubscribeMixin(LitElement) {
@@ -22,9 +23,10 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
     @state() schedule?: Schedule
     @state() rooms: Room[] = [];
     @state() entities: Entities[] = [];
-    @state() component_loaded;
+    @state() suntimes?: SunTimes;
+    @state() component_loaded?: boolean;
     @state() _activeSlot = null;
- 	  @state() _activeDay = null;
+ 	@state() _activeDay = null;
   	@state() editMode = false;
     @state() _current_user?: CurrentUser = this.hass?.user
     @state() _assigning_in_progress = 0;
@@ -61,9 +63,59 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
         return true
     }
 
+    getSunTime(day: string, time: string): string {
+        if (time == SPECIAL_TIMES[0]) {
+            return this.suntimes!.Sunrises[days.indexOf(day)].time
+        }
+        return this.suntimes!.Sunsets[days.indexOf(day)].time
+    }
+
+    async convertLoadedSchedule(schedule: Schedule): Promise<Schedule> {
+        const updatedScheduleDays = schedule.ScheduleData.map(day => this.convertLoadedScheduleDay(day))
+        schedule.ScheduleData = updatedScheduleDays
+        return schedule;
+    }
+
+    convertLoadedScheduleDay(day: ScheduleDay): ScheduleDay {
+        const slots = day.slots;
+        const outputSlots: ScheduleSlot[] = slots.map((slot) => {
+            return SPECIAL_TIMES.includes(slot.Time) ?
+                { "Time": this.getSunTime(day.day, slot.Time), "Setpoint": slot.Setpoint, "SpecialTime": slot.Time }
+                : { "Time": slot.Time, "Setpoint": slot.Setpoint, "SpecialTime": "" }
+        }).sort((a, b) => parseInt(a.Time.replace(':', '')) < parseInt(b.Time.replace(':', '')) ? 0 : 1)
+
+        const outputSlotsSet = new Set(outputSlots.map(e => JSON.stringify(e)));
+        const res = Array.from(outputSlotsSet).map(e => JSON.parse(e));
+        const outputDay: ScheduleDay = { "day": day.day, "slots": res };
+        return outputDay;
+
+    }
+
+    async convertScheduleForSaving(schedule: Schedule): Promise<Schedule> {
+      const updatedScheduleDays = schedule.ScheduleData.map(day => this.convertScheduleDayForSaving(day))
+      schedule.ScheduleData = updatedScheduleDays
+      return schedule;
+    }
+
+    convertScheduleDayForSaving(day: ScheduleDay): ScheduleDay {
+      const slots = day.slots;
+      const outputSlots: ScheduleSlot[] = slots.map((slot) => {
+          return SPECIAL_TIMES.includes(slot.SpecialTime) ?
+              { "Time": slot.SpecialTime, "Setpoint": slot.Setpoint, "SpecialTime": slot.SpecialTime }
+              : { "Time": slot.Time, "Setpoint": slot.Setpoint, "SpecialTime": "" }
+      }).sort((a, b) => a.Time.replace(':', '') < b.Time.replace(':', '') ? 0 : 1)
+      const outputSlotsSet = new Set(outputSlots.map(e => JSON.stringify(e)));
+      const res = Array.from(outputSlotsSet).map(e => JSON.parse(e));
+      const outputDay: ScheduleDay = { "day": day.day, "slots": res };
+      return outputDay;
+
+  }
+
     private async loadData() {
-        if (this.schedule_type && this.schedule_id) {
-            this.schedule = await fetchScheduleById(this.hass!, this.config!.hub, this.schedule_type!, this.schedule_id!);
+        if (this.schedule_type && this.schedule_id && !this.editMode) {
+            const schedule = await fetchScheduleById(this.hass!, this.config!.hub, this.schedule_type!, this.schedule_id!);
+            this.suntimes = await fetchSunTimes(this.hass!, this.config!.hub);
+            this.schedule = await this.convertLoadedSchedule(schedule)
             this.entities = await this.get_entity_list(this.hass!, this.config!.hub);
         }
     }
@@ -86,14 +138,15 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
         || changedProps.has('_assigning_in_progress')
         || changedProps.has('_save_in_progress')
         ) { return true }
-        return false;
+      return false;
+      //          || changedProps.has('sunTimes')
     }
 
 
 	protected render(): TemplateResult {
 		//<ha-icon-button .path=${mdiClose} @click=${this.backClick}> </ha-icon-button>
         if (!this.hass || !this.config || !this.component_loaded) return html``;
-        if (this.schedule  && this.entities) {
+        if (this.schedule  && this.entities  && this.suntimes) {
           return html`
             <ha-card>
             <div class="card-header">
@@ -122,6 +175,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
                                 .config=${this.config}
                                 .schedule=${this.editMode ? this._tempSchedule : this.schedule}
 								.schedule_type=${this.schedule_type}
+                                .suntimes=${this.suntimes}
                                 .editMode=${this.editMode}
 								@scheduleChanged=${this.scheduleChanged}
                             ></wiser-schedule-slot-editor>
@@ -145,8 +199,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
             <div class="card-content">
             </div>
         </ha-card>`;
-	}
-
+    }
 
     renderScheduleAssignment(entities: Entities[], schedule_entities: ScheduleAssignments[] | string[]): TemplateResult | void {
 		if (this.schedule && !this.editMode) {
@@ -193,6 +246,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 					<div class="actions-wrapper">
 						<div class="sub-heading">${localize('wiser.headings.schedule_actions')}</div>
 						<div class="wrapper schedule-action-wrapper">
+                            ${this.renderScheduleRenameButton()}
 							${this.renderEditScheduleButton()}
 							${this.renderCopyScheduleButton()}
 							${this.renderDeleteScheduleButton()}
@@ -241,6 +295,17 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 			>Cancel
 			</mwc-button>
 		`;
+    }
+
+    renderScheduleRenameButton(): TemplateResult {
+        return html`
+            <mwc-button
+                class='large active'
+                label=${'Rename'}
+                @click=${this.renameScheduleClick}
+                >
+			</mwc-button>
+        `;
     }
 
     renderDeleteScheduleButton(): TemplateResult | void {
@@ -330,7 +395,12 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
     filesClick(): void {
       const myEvent = new CustomEvent('filesClick');
       this.dispatchEvent(myEvent);
-  }
+    }
+
+    async renameScheduleClick(): Promise<void> {
+        const myEvent = new CustomEvent('renameClick');
+        this.dispatchEvent(myEvent);
+    }
 
     // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
     async deleteClick(ev): Promise<void> {
@@ -360,19 +430,37 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 
 	cancelClick(): void {
 		this.editMode = false;
-	}
+    }
+
+    validateSchedule(schedule: Schedule): boolean {
+        const hasSlotsForDay = schedule.ScheduleData.map(day => {
+            return day.slots
+        })
+        const hasSlots = hasSlotsForDay.map(day => { return day.length > 0 })
+        return hasSlots.includes(true)
+    }
 
     async saveClick(): Promise<void> {
         this._save_in_progress = true;
-        await saveSchedule(this.hass!, this.config.hub, this.schedule_type!, this.schedule_id!, this._tempSchedule!);
+        if (this.validateSchedule(this._tempSchedule!)) {
+
+            if (SUPPORT_SPECIAL_TIMES.includes(this.schedule_type!)) {
+                this._tempSchedule = await this.convertScheduleForSaving(this._tempSchedule!)
+            }
+            await saveSchedule(this.hass!, this.config.hub, this.schedule_type!, this.schedule_id!, this._tempSchedule!);
+            this.editMode = false;
+        } else {
+            const errorMessage = html`The schedule you are trying to save has no time slots.`;
+            showErrorDialog(this, 'Error Saving Schedule', errorMessage);
+        }
         this._save_in_progress = false;
-        this.editMode = false;
-	}
+    }
+
 
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 	scheduleChanged(ev): void {
-    this._tempSchedule = ev.detail.schedule;
-    this.render()
+        this._tempSchedule = ev.detail.schedule;
+        this.render()
 	}
 
     static get styles(): CSSResultGroup {
@@ -575,7 +663,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 		  border-radius: var(--mdc-shape-small, 4px)
         }
 		mwc-button.large {
-			width: 25%;
+			width: 22.5%;
 			margin: 2px;
 			max-width: 200px;
 		}

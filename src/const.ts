@@ -1,4 +1,4 @@
-export const CARD_VERSION = '1.0.11';
+export const CARD_VERSION = '1.0.14';
 
 export const DOMAIN = 'wiser';
 
@@ -21,6 +21,7 @@ export enum EViews {
     ScheduleEdit = 'SCHEDULE_EDIT',
     ScheduleCopy = 'SCHEDULE_COPY',
     ScheduleAdd = 'SCHEDULE_ADD',
+    ScheduleRename = 'SCHEDULE_RENAME',
 }
 
 export enum DefaultSetpoint {
@@ -39,9 +40,15 @@ export enum SetpointUnits {
 
 export const WebsocketEvent = 'scheduler_updated';
 export const HEATING_TYPES = ['Heating', 'OnOff', 'Lighting', 'Shutters']
+export const SUPPORT_SPECIAL_TIMES = ['Lighting','Shutters']
 
 export const weekdays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 export const weekends: string[] = ['Saturday', 'Sunday']
 export const days: string[] = weekdays.concat(weekends)
 export const days_short: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+export const SPECIAL_TIMES = ['Sunrise', 'Sunset']
+export enum SPECIAL_TIMES_MAPPING {
+    Sunrise = '3000',
+    Sunset = '4000'
+}
 export const day_short_width = 500;

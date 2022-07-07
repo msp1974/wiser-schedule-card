@@ -1,9 +1,16 @@
-import { HomeAssistant } from 'custom-card-helpers';
-import { Schedule, Entities, ScheduleListItem } from '../types';
+import { fireEvent, HomeAssistant } from 'custom-card-helpers';
+import { html, TemplateResult } from 'lit';
+import { Schedule, Entities, ScheduleListItem, SunTimes } from '../types';
 
 export const fetchHubs = (hass: HomeAssistant): Promise<string[]> =>
     hass.callWS({
         type: 'wiser/hubs',
+    });
+
+export const fetchSunTimes = (hass: HomeAssistant, hub: string): Promise<SunTimes> =>
+    hass.callWS({
+        type: 'wiser/suntimes',
+        hub: hub
     });
 
 export const fetchScheduleTypes = (hass: HomeAssistant, hub: string): Promise<string[]> =>
@@ -83,5 +90,23 @@ export const copySchedule = (hass: HomeAssistant, hub: string, schedule_type: st
         schedule_id: from_schedule_id,
         to_schedule_id: to_schedule_id
     })
+
+export const renameSchedule = (hass: HomeAssistant, hub: string, schedule_type: string, schedule_id: number, schedule_name: string): Promise<boolean> =>
+    hass.callWS({
+        type: 'wiser/schedule/rename',
+        hub: hub,
+        schedule_type: schedule_type,
+        schedule_id: schedule_id,
+        schedule_name: schedule_name
+    })
+
+export function showErrorDialog(target: HTMLElement, title: string, error: string | TemplateResult): void {
+    fireEvent(target, 'show-dialog', {
+        dialogTag: 'wiser-dialog-error',
+        dialogImport: () => import('../components/dialog-error'),
+        dialogParams: { title: title, error: error },
+    });
+    }
+
 
 
