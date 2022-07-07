@@ -8,9 +8,9 @@ import { HomeAssistant } from 'custom-card-helpers';
 
 import { mdiRadiatorOff, mdiUnfoldMoreVertical } from '@mdi/js';
 
-import type { WiserScheduleCardConfig, ScheduleSlot, Schedule, ScheduleDay } from '../types';
+import type { WiserScheduleCardConfig, ScheduleSlot, Schedule, ScheduleDay, SunTimes } from '../types';
 import { color_map, getLocale, get_end_time, get_setpoint, stringTimeToSeconds } from '../helpers';
-import { HEATING_TYPES, SEC_PER_DAY, day_short_width, days, days_short, DefaultSetpoint, SetpointUnits } from '../const';
+import { HEATING_TYPES, SEC_PER_DAY, day_short_width, days, days_short, DefaultSetpoint, SetpointUnits, SPECIAL_TIMES, SUPPORT_SPECIAL_TIMES } from '../const';
 import './dialog-delete-confirm';
 import { parseRelativeTime, roundTime, stringToTime, timeToString } from '../data/date-time/time';
 import { formatTime, TimeFormat } from '../data/date-time/format_time';
@@ -27,6 +27,7 @@ export class ScheduleSlotEditor extends LitElement {
     @property({ attribute: false }) config?: WiserScheduleCardConfig;
 
     @property({ attribute: false }) schedule?: Schedule;
+    @property({ attribute: false }) suntimes?: SunTimes;
 
     @property({ attribute: false }) editMode = false;
 
@@ -71,12 +72,12 @@ export class ScheduleSlotEditor extends LitElement {
     render(): TemplateResult {
         const fullWidth = parseFloat(getComputedStyle(this).getPropertyValue('width'));
         this._show_short_days = (fullWidth < day_short_width)
-        if (!this.hass || !this.config) return html``;
+        if (!this.hass || !this.config || !this.suntimes || !this.schedule) return html``;
         return html`
             <div class = "slots-wrapper">
                 ${days.map(day => this.renderDay(
-                    this.schedule?.ScheduleData.filter(rday => rday.day == day)[0]
-                        ? this.schedule?.ScheduleData.filter(rday => rday.day == day)[0]
+                    this.schedule!.ScheduleData.filter(rday => rday.day == day)[0]
+                        ? this.schedule!.ScheduleData.filter(rday => rday.day == day)[0]
                         : { "day": day, "slots": [] }
                 ))}
                 <div class="wrapper" style="display:flex; height:28px;">
@@ -87,6 +88,7 @@ export class ScheduleSlotEditor extends LitElement {
                     </div>
                 </div>
             </div>
+            ${this.editMode && SUPPORT_SPECIAL_TIMES.includes(this.schedule_type!) ? this.renderSpecialTimeButtons(): null}
             ${this.editMode ? this.renderAddDeleteButtons() : null}
             ${this.renderSetPointControl()}
         `;
@@ -95,7 +97,7 @@ export class ScheduleSlotEditor extends LitElement {
     }
 
     renderDay(day: ScheduleDay): TemplateResult {
-        const slot: ScheduleSlot = { 'Time': '24:00', 'Setpoint': '0' }
+        const slot: ScheduleSlot = { 'Time': '23:59', 'Setpoint': '0' , 'SpecialTime': ''}
         return html`
             <div class="wrapper">
                 ${this.computeDayLabel(day.day)}
@@ -120,7 +122,7 @@ export class ScheduleSlotEditor extends LitElement {
         return html`
         <div
             id=${day.day + '|-1'}
-            class="slot previous ${this.editMode && onlySlot ? 'selectable':null} ${this._activeSlot == index && this._activeDay == day.day ? 'selected':null}"
+            class="slot previous ${this.editMode && onlySlot ? 'selectable':null} ${this._activeSlot == index && this._activeDay == day.day ? 'selected':null} ${this.config!.theme_colors ? 'theme-colors': null}"
             style="width:${Math.floor(width * 1000) / 1000}%; background:${colour};"
             title='${title}'
             @click=${onlySlot ? this._slotClick : null}
@@ -141,7 +143,7 @@ export class ScheduleSlotEditor extends LitElement {
         const colour = (this.config!.theme_colors ? 'rgba(var(--rgb-primary-color), 0.7)' : 'rgba(' + color_map(this, this.schedule_type!, setpoint) + ')');
         const fullWidth = parseFloat(getComputedStyle(this).getPropertyValue('width'));
         const label_class = (width / 100) * fullWidth < 35 ? 'setpoint rotate' : 'setpoint';
-        const title = 'Start - ' + start_time + '\nEnd - ' + end_time + '\nSetting - ' + this.computeSetpointLabel(setpoint);
+        const title = 'Start - ' + (slot.SpecialTime ? slot.SpecialTime + ' (' + start_time + ')' : start_time) + '\nEnd - ' + end_time + '\nSetting - ' + this.computeSetpointLabel(setpoint);
 
         return html`
             ${index == 0 && start_time != '00:00' && start_time !='0:00' ? this.renderEmptySlot(slot, -1, day, false) : ''}
@@ -171,7 +173,32 @@ export class ScheduleSlotEditor extends LitElement {
                     </div>
                 `
                 : ''}
-                ${this._activeSlot == index  && this._activeDay == day.day ? this.renderTooltip(index) : ''}
+                ${this._activeSlot == index  && this._activeDay == day.day ? this.renderTooltip(day, index) : ''}
+            </div>
+        `;
+    }
+
+    renderSpecialTimeButtons(): TemplateResult {
+        const slot = this._activeDay ? this.schedule!.ScheduleData.filter(rday => rday.day == this._activeDay)[0].slots[this._activeSlot] : null;
+        return html`
+            <div class="wrapper special-times" style="white-space: normal;">
+                <div class="sub-heading">Set Special Time</div>
+                <mwc-button
+                    id=${'sunrise'}
+                    @click=${this._setSpecialTime}
+                    ?disabled=${!slot}
+                >
+                    <ha-icon id=${'sunrise'} icon="hass:weather-sunny" class="padded-right"></ha-icon>
+                    Sunrise
+                </mwc-button>
+                <mwc-button
+                    id=${'sunset'}
+                    @click=${this._setSpecialTime}
+                    ?disabled=${!slot}
+                >
+                    <ha-icon id=${'sunset'} icon="hass:weather-night" class="padded-right"></ha-icon>
+                    Sunset
+                </mwc-button>
             </div>
         `;
     }
@@ -189,7 +216,7 @@ export class ScheduleSlotEditor extends LitElement {
                         @click=${this._addSlot}
                         ?disabled=${this._activeSlot < 0 || slotCount >= 24}
                     >
-                        <ha-icon icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
+                        <ha-icon id=${'add-before'} icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
                         ${localize('wiser.actions.add_before')}
                     </mwc-button>
                     <mwc-button
@@ -197,7 +224,7 @@ export class ScheduleSlotEditor extends LitElement {
                         @click=${this._addSlot}
                         ?disabled=${this._activeSlot < -1 || slotCount >= 24}
                     >
-                        <ha-icon icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
+                        <ha-icon id=${'add-after'} icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
                         ${localize('wiser.actions.add_after')}
                     </mwc-button>
                     <mwc-button
@@ -288,9 +315,9 @@ export class ScheduleSlotEditor extends LitElement {
         return html``;
     }
 
-    renderTooltip(i: number): TemplateResult {
-        const slots = this.schedule!.ScheduleData.filter(rday => rday.day == this._activeDay)[0].slots;
-        const res = parseRelativeTime(slots![i].Time);
+    renderTooltip(day: ScheduleDay, i: number): TemplateResult {
+        const slots = day.slots;
+        const res = SPECIAL_TIMES.includes(slots![i].SpecialTime);
         return html`
           <div class="tooltip-container center">
             <div
@@ -300,16 +327,11 @@ export class ScheduleSlotEditor extends LitElement {
               ${res
                 ? html`
                     <ha-icon
-                      icon="hass:${res.event == 'sunrise'
+                      icon="hass:${slots![i].SpecialTime == SPECIAL_TIMES[0]
                         ? 'weather-sunny'
                         : 'weather-night'}"
                     ></ha-icon>
-                    ${res.sign}
-                    ${formatTime(
-                      stringToDate(res.offset),
-                      getLocale(this.hass!),
-                      TimeFormat.twenty_four
-                    )}
+                    ${slots![i].SpecialTime}
                   `
                 : slots![i].Time}
             </div>
@@ -353,6 +375,58 @@ export class ScheduleSlotEditor extends LitElement {
         this.requestUpdate();
     }
 
+    getSunTime(day: string, time: string): string {
+        if (time == SPECIAL_TIMES[0]) {
+            return this.suntimes!.Sunrises[days.indexOf(day)].time
+        }
+        return this.suntimes!.Sunsets[days.indexOf(day)].time
+    }
+
+    convertScheduleDay(day: ScheduleDay): ScheduleDay {
+        const slots = day.slots;
+        const outputSlots: ScheduleSlot[] = slots.map((slot) => {
+            return SPECIAL_TIMES.includes(slot.SpecialTime) ?
+                { "Time": this.getSunTime(day.day, slot.SpecialTime), "Setpoint": slot.Setpoint, "SpecialTime": slot.SpecialTime }
+                : { "Time": slot.Time, "Setpoint": slot.Setpoint, "SpecialTime": slot.SpecialTime }
+        }).sort((a, b) => parseInt(a.Time.replace(':', '')) < parseInt(b.Time.replace(':', '')) ? 0 : 1)
+
+        const outputSlotsSet = new Set(outputSlots.map(e => JSON.stringify(e)));
+        const res = Array.from(outputSlotsSet).map(e => JSON.parse(e));
+        const outputDay: ScheduleDay = { "day": day.day, "slots": res };
+        return outputDay;
+
+    }
+
+    private _setSpecialTime(ev) {
+        const titleCase = (str) => {
+            return str.replace(/\w\S*/g, (t) => { return t.charAt(0).toUpperCase() + t.substr(1).toLowerCase() });
+          }
+        const specialTime = titleCase(ev.target.id)
+        if (this._activeDay && this._activeSlot >= 0) {
+            if (this.schedule!.ScheduleData[days.indexOf(this._activeDay!)].slots[this._activeSlot].SpecialTime != specialTime) {
+                this.schedule!.ScheduleData[days.indexOf(this._activeDay!)].slots = Object.assign(
+                    this.schedule!.ScheduleData[days.indexOf(this._activeDay!)].slots,
+                    {
+                        [this._activeSlot!]: {
+                            ...this.schedule!.ScheduleData[days.indexOf(this._activeDay!)].slots![this._activeSlot!],
+                            SpecialTime: specialTime,
+                            Time: this.getSunTime(this._activeDay, specialTime),
+                        }
+                    },
+                );
+            }
+
+            //Resort slots
+            this.schedule!.ScheduleData[days.indexOf(this._activeDay!)] = this.convertScheduleDay(this.schedule!.ScheduleData[days.indexOf(this._activeDay!)])
+
+            //Set correct active slot
+            this.schedule!.ScheduleData[days.indexOf(this._activeDay!)].slots.forEach((slot, i) => {
+                if (slot.SpecialTime == specialTime) {this._activeSlot = i}
+            })
+            this.requestUpdate();
+        }
+    }
+
     private _addSlot(ev) {
         const add_before = ev.target.id === 'add-before' ? true : false;
         if (this._activeSlot < -1) return;
@@ -366,33 +440,53 @@ export class ScheduleSlotEditor extends LitElement {
                         getLocale(this.hass!)
                     ).padStart(5, '0'),
                     Setpoint: DefaultSetpoint[this.schedule_type!],
+                    SpecialTime: ''
                 }
             ];
             this._activeSlot = 0;
         } else {
             const activeSlot = this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot];
-            const startTime = stringToTime(activeSlot.Time, this.hass!);
+            let startTime = stringToTime(activeSlot.Time, this.hass!);
             let endTime = stringToTime(get_end_time(this.schedule!.ScheduleData[activeDayIndex], this._activeSlot), this.hass!);
             if (endTime < startTime) endTime += SEC_PER_DAY;
             const newStop = roundTime(startTime + (endTime - startTime) / 2, this.stepSize);
+
             if (add_before) {
-                this.schedule!.ScheduleData[activeDayIndex].slots = [
-                    ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
-                    {
-                        Time: formatTime(
-                            stringToDate(timeToString(startTime)),
-                            getLocale(this.hass!)
-                        ).padStart(5, '0'),
-                        Setpoint: DefaultSetpoint[this.schedule_type!],
-                    },
-                    {
-                        ...this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot!], Time: formatTime(
-                            stringToDate(timeToString(newStop)),
-                            getLocale(this.hass!)
-                        ),
-                    },
-                    ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(this._activeSlot + 1),
-                ];
+                if (!activeSlot.SpecialTime) {
+                    console.log("Normal path", activeSlot)
+                    this.schedule!.ScheduleData[activeDayIndex].slots = [
+                        ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
+                        {
+                            Time: formatTime(
+                                stringToDate(timeToString(startTime)),
+                                getLocale(this.hass!)
+                            ).padStart(5, '0'),
+                            Setpoint: DefaultSetpoint[this.schedule_type!],
+                            SpecialTime: ''
+                        },
+                        {
+                            ...this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot!], Time: formatTime(
+                                stringToDate(timeToString(newStop)),
+                                getLocale(this.hass!)
+                            ),
+                        },
+                        ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(this._activeSlot + 1),
+                    ];
+                } else {
+                    startTime = roundTime(startTime - stringToTime('01:00', this.hass!), this.stepSize)
+                    this.schedule!.ScheduleData[activeDayIndex].slots = [
+                        ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
+                        {
+                            Time: formatTime(
+                                stringToDate(timeToString(startTime)),
+                                getLocale(this.hass!)
+                            ).padStart(5, '0'),
+                            Setpoint: DefaultSetpoint[this.schedule_type!],
+                            SpecialTime: ''
+                        },
+                        ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(this._activeSlot),
+                    ];
+                }
             } else {
                 this.schedule!.ScheduleData[activeDayIndex].slots = [
                     ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot + 1),
@@ -402,6 +496,7 @@ export class ScheduleSlotEditor extends LitElement {
                             getLocale(this.hass!)
                         ).padStart(5, '0'),
                         Setpoint: DefaultSetpoint[this.schedule_type!],
+                        SpecialTime: ''
                     },
                     ...this.schedule!.ScheduleData[activeDayIndex].slots!.slice(this._activeSlot + 1),
                 ];
@@ -509,6 +604,7 @@ export class ScheduleSlotEditor extends LitElement {
             [i]: {
             ...slots![i],
             Time: timeString,
+            SpecialTime: '',
             },
         });
         this.requestUpdate();
@@ -641,7 +737,6 @@ export class ScheduleSlotEditor extends LitElement {
         return setPoint + SetpointUnits[this.schedule_type!];
     }
 
-
     static get styles(): CSSResultGroup {
         return css`
             :host {
@@ -663,6 +758,13 @@ export class ScheduleSlotEditor extends LitElement {
             border-top: 1px solid var(--divider-color, #e8e8e8);
             padding: 5px 0px;
             min-height: 40px;
+            }
+            .special-times {
+                justify-content: flex-end;
+                line-height: 40px;
+                padding: 0 5px;
+                text-transform: uppercase;
+                font-size: small;
             }
             .section-header {
                 color: var(--material-body-text-color, #000);
@@ -725,7 +827,10 @@ export class ScheduleSlotEditor extends LitElement {
             border-radius: 5px 0 0 5px;
             }
             .previous.selected {
-                border: 2px solid #02d0ff;
+                border: 2px solid var(--primary-color);
+            }
+            .previous.selected.theme-colors {
+                border: 2px solid var(--warning-color)
             }
             .wrapper.selectable .slot:hover {
             background: rgba(var(--rgb-primary-color), 0.85);
@@ -916,7 +1021,7 @@ export class ScheduleSlotEditor extends LitElement {
         height: 0px;
       }
         div.tooltip ha-icon {
-            --mdc-icon-size: 20px;
+            --mdc-icon-size: 18px;
         }
 
         mwc-button.state-button {
@@ -957,7 +1062,7 @@ export class ScheduleSlotEditor extends LitElement {
           }
 
           mwc-button ha-icon {
-            margin-right: 11px;
+            margin-right: 2px;
           }
           mwc-button.active {
             background: var(--primary-color);
@@ -978,3 +1083,4 @@ export class ScheduleSlotEditor extends LitElement {
 
 
 }
+

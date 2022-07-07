@@ -19,9 +19,30 @@ export interface WiserScheduleCardConfig extends LovelaceCardConfig {
     selected_schedule?: string;
 }
 
+interface SunTimeDays {
+  Monday: string;
+  Tuesday: string;
+  Wednesday: string;
+  Thursday: string;
+  Friday: string;
+  Saturday: string;
+  Sunday: string;
+}
+
+interface SunTime {
+  day: string;
+  time: string;
+}
+
+export interface SunTimes {
+  Sunrises: SunTime[];
+  Sunsets: SunTime[];
+}
+
 export interface ScheduleSlot {
   Time: string;
   Setpoint: string;
+  SpecialTime: string;
 }
 
 export interface ScheduleDay {

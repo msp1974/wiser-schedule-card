@@ -91,7 +91,7 @@ export function get_start_time(day: ScheduleDay, index: number): string {
 }
 
 export function get_end_time(day: ScheduleDay, index: number): string {
-  if (day.slots.length == 0 || day.slots.length - 1 == index) {return '24:00'}
+  if (day.slots.length == 0 || day.slots.length - 1 == index) {return '23:59'}
   return day.slots[index +1].Time
 }
 
