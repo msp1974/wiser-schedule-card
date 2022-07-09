@@ -191,7 +191,7 @@ export class WiserScheduleCard extends LitElement {
                     .schedule_type=${this._schedule_type}
                     @backClick=${this._backClick}
                     @scheduleRenamed=${this._scheduleRenamed}
-                ></wiser-schedule-copy-card>
+                ></wiser-schedule-rename-card>
             `;
         }
         return html``;
