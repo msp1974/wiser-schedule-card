@@ -182,7 +182,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
                         </div>
                     </div>
                 </div>
-				${this.entities.length ? this.renderScheduleAssignment(this.entities, this.schedule!.Assignments): '(No available devices)'}
+				${this.renderScheduleAssignment(this.entities, this.schedule!.Assignments)}
 				${this.renderScheduleActionButtonSection()}
             </div>
             ${this.renderCardActions()}
@@ -207,7 +207,10 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 				return html`
 					<div class="assignment-wrapper">
 						<div class="sub-heading">${localize('wiser.headings.schedule_assignment')}</div>
-						${entities.map(entity => this.renderEntityButton(entity, schedule_entities.map(function(a) {return a.name}).includes(entity.Name)))}
+						${ entities.length > 0 ?
+                entities.map(entity => this.renderEntityButton(entity, schedule_entities.map(function (a) { return a.name }).includes(entity.Name)))
+            : html`<div class="schedule-info">(No Assignable Devices)</div>`
+          }
 					</div>
 				`;
 			} else {
@@ -301,7 +304,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
         return html`
             <mwc-button
                 class='large active'
-                label=${'Rename'}
+                label=${localize('wiser.actions.rename')}
                 @click=${this.renameScheduleClick}
                 >
 			</mwc-button>
