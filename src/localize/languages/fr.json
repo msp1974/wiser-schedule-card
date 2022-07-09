@@ -7,6 +7,7 @@
     "actions": {
       "copy": "Copie",
       "files": "Fichier",
+      "rename": "Renommer",
       "add_before": "Ajouter Avant",
       "add_after": "Ajouter Après"
     },
