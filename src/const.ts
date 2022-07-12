@@ -1,4 +1,4 @@
-export const CARD_VERSION = '1.1.0';
+export const CARD_VERSION = '1.1.1';
 
 export const DOMAIN = 'wiser';
 
@@ -42,6 +42,7 @@ export const WebsocketEvent = 'scheduler_updated';
 export const HEATING_TYPES = ['Heating', 'OnOff', 'Lighting', 'Shutters']
 export const SUPPORT_SPECIAL_TIMES = ['Lighting','Shutters']
 
+export const SPECIAL_DAYS: string[] = ['Weekdays', 'Weekend']
 export const weekdays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
 export const weekends: string[] = ['Saturday', 'Sunday']
 export const days: string[] = weekdays.concat(weekends)

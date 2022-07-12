@@ -10,7 +10,7 @@ import { mdiRadiatorOff, mdiUnfoldMoreVertical } from '@mdi/js';
 
 import type { WiserScheduleCardConfig, ScheduleSlot, Schedule, ScheduleDay, SunTimes } from '../types';
 import { color_map, getLocale, get_end_time, get_setpoint, stringTimeToSeconds } from '../helpers';
-import { HEATING_TYPES, SEC_PER_DAY, day_short_width, days, days_short, DefaultSetpoint, SetpointUnits, SPECIAL_TIMES, SUPPORT_SPECIAL_TIMES } from '../const';
+import { HEATING_TYPES, SEC_PER_DAY, day_short_width, days, days_short, DefaultSetpoint, SetpointUnits, SPECIAL_TIMES, SUPPORT_SPECIAL_TIMES, SPECIAL_DAYS, weekdays, weekends } from '../const';
 import './dialog-delete-confirm';
 import { parseRelativeTime, roundTime, stringToTime, timeToString } from '../data/date-time/time';
 import { formatTime, TimeFormat } from '../data/date-time/format_time';
@@ -90,7 +90,8 @@ export class ScheduleSlotEditor extends LitElement {
             </div>
             ${this.editMode && SUPPORT_SPECIAL_TIMES.includes(this.schedule_type!) ? this.renderSpecialTimeButtons(): null}
             ${this.editMode ? this.renderAddDeleteButtons() : null}
-            ${this.renderSetPointControl()}
+            ${this.editMode ? this.renderSetPointControl(): null}
+            ${this.editMode ? this.renderCopyDay(): null}
         `;
 
 
@@ -211,29 +212,31 @@ export class ScheduleSlotEditor extends LitElement {
         return html`
                 <div class="wrapper" style="white-space: normal;">
                     <div class="day  ${this._show_short_days ? 'short':''}">&nbsp;</div>
-                    <mwc-button
-                        id=${'add-before'}
-                        @click=${this._addSlot}
-                        ?disabled=${this._activeSlot < 0 || slotCount >= 24}
-                    >
-                        <ha-icon id=${'add-before'} icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
-                        ${localize('wiser.actions.add_before')}
-                    </mwc-button>
-                    <mwc-button
-                        id=${'add-after'}
-                        @click=${this._addSlot}
-                        ?disabled=${this._activeSlot < -1 || slotCount >= 24}
-                    >
-                        <ha-icon id=${'add-after'} icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
-                        ${localize('wiser.actions.add_after')}
-                    </mwc-button>
-                    <mwc-button
-                        @click=${this._removeSlot}
-                        ?disabled=${this._activeSlot < 0 || slotCount < 1}
-                    >
-                        <ha-icon icon="hass:minus-circle-outline" class="padded-right"></ha-icon>
-                        ${this.hass!.localize('ui.common.delete')}
-                    </mwc-button>
+                    <div class="sub-section">
+                        <mwc-button
+                            id=${'add-before'}
+                            @click=${this._addSlot}
+                            ?disabled=${this._activeSlot < 0 || slotCount >= 24}
+                        >
+                            <ha-icon id=${'add-before'} icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
+                            ${localize('wiser.actions.add_before')}
+                        </mwc-button>
+                        <mwc-button
+                            id=${'add-after'}
+                            @click=${this._addSlot}
+                            ?disabled=${this._activeSlot < -1 || slotCount >= 24}
+                        >
+                            <ha-icon id=${'add-after'} icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
+                            ${localize('wiser.actions.add_after')}
+                        </mwc-button>
+                        <mwc-button
+                            @click=${this._removeSlot}
+                            ?disabled=${this._activeSlot < 0 || slotCount < 1}
+                        >
+                            <ha-icon icon="hass:minus-circle-outline" class="padded-right"></ha-icon>
+                            ${this.hass!.localize('ui.common.delete')}
+                        </mwc-button>
+                    </div>
                 </div>
             `;
         //}
@@ -248,71 +251,112 @@ export class ScheduleSlotEditor extends LitElement {
             }
             if (this.schedule_type == 'Heating') {
                 return html`
-                    <div class="wrapper" style="white-space: normal;">
+                    <div class="wrapper" style="white-space: normal; padding-top: 10px;">
                         <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
-                        <div class="section-header">Temperature</div>
-                        <ha-icon-button
-                            class="set-off-button"
-                            .path=${mdiRadiatorOff}
-                            .disabled=${this._activeSlot < 0 }
-                            @click=${() => this._updateSetPoint('-20')}
-                        > </ha-icon-button>
-                        <wiser-variable-slider
-                            min="5"
-                            max="30"
-                            step="0.5"
-                            value=${this._activeSlot >= 0 ? parseFloat(slots![this._activeSlot!].Setpoint) : 0}
-                            unit="°C"
-                            .optional=${false}
-                            .disabled=${this._activeSlot < 0 }
-                            @value-changed=${(ev: CustomEvent) => { this._updateSetPoint(Number(ev.detail.value)); }}
-                        >
-                        </wiser-variable-slider>
+                        <div class="sub-section">
+                            <div class="section-header">Temp</div>
+                            <br />
+                            <div style="display: flex; line-height: 32px; width: 100%">
+                                <ha-icon-button
+                                    class="set-off-button"
+                                    .path=${mdiRadiatorOff}
+                                    .disabled=${this._activeSlot < 0 }
+                                    @click=${() => this._updateSetPoint('-20')}
+                                > </ha-icon-button>
+                                <wiser-variable-slider
+                                    min="5"
+                                    max="30"
+                                    step="0.5"
+                                    value=${this._activeSlot >= 0 ? parseFloat(slots![this._activeSlot!].Setpoint) : 0}
+                                    unit="°C"
+                                    .optional=${false}
+                                    .disabled=${this._activeSlot < 0 }
+                                    @value-changed=${(ev: CustomEvent) => { this._updateSetPoint(Number(ev.detail.value)); }}
+                                >
+                                </wiser-variable-slider>
+                            </div>
+                        </div>
                     </div>
                 `;
             } else if (this.schedule_type == 'OnOff') {
                 return html`
                     <div class="wrapper" style="white-space: normal; height: 36px;">
                         <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
-                        <div class="section-header">State</div>
-                        <mwc-button id="state-off"
-                            class="state-button active"
-                            .disabled=${this._activeSlot < 0 || slots[this._activeSlot!].Setpoint == 'Off' ? true : false}
-                            @click=${() => this._updateSetPoint('Off')}
-                            >
-                            Off
-                        </mwc-button>
-                        <mwc-button id="state-on"
-                            class="state-button active"
-                            .disabled=${this._activeSlot < 0 || slots[this._activeSlot!].Setpoint == 'On' ? true : false}
-                            @click=${() => this._updateSetPoint('On')}
-                            >
-                            On
-                        </mwc-button>
+                        <div class="sub-section">
+                            <div class="section-header">State</div>
+                            <div>
+                                <mwc-button id="state-off"
+                                    class="state-button active"
+                                    .disabled=${this._activeSlot < 0 || slots[this._activeSlot!].Setpoint == 'Off' ? true : false}
+                                    @click=${() => this._updateSetPoint('Off')}
+                                    >
+                                    Off
+                                </mwc-button>
+                                <mwc-button id="state-on"
+                                    class="state-button active"
+                                    .disabled=${this._activeSlot < 0 || slots[this._activeSlot!].Setpoint == 'On' ? true : false}
+                                    @click=${() => this._updateSetPoint('On')}
+                                    >
+                                    On
+                                </mwc-button>
+                            </div>
+                        </div>
                     </div>
                 `;
             } else if (['Lighting', 'Shutters'].includes(this.schedule_type!)) {
                 return html`
                     <div class="wrapper" style="white-space: normal;">
                         <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
-                        <div class="section-header">Level</div>
-                        <wiser-variable-slider
-                            min="0"
-                            max="100"
-                            step="1"
-                            value=${this._activeSlot >= 0 ? parseInt(slots![this._activeSlot!].Setpoint) : 0}
-                            unit="%"
-                            .optional=${false}
-                            .disabled=${this._activeSlot < 0}
-                            @value-changed=${(ev: CustomEvent) => { this._updateSetPoint(Number(ev.detail.value)); }}
-                        >
-                        </wiser-variable-slider>
+                        <div class="sub-section">
+                            <div class="section-header">Level</div>
+                            <div>
+                                <wiser-variable-slider
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    value=${this._activeSlot >= 0 ? parseInt(slots![this._activeSlot!].Setpoint) : 0}
+                                    unit="%"
+                                    .optional=${false}
+                                    .disabled=${this._activeSlot < 0}
+                                    @value-changed=${(ev: CustomEvent) => { this._updateSetPoint(Number(ev.detail.value)); }}
+                                >
+                                </wiser-variable-slider>
+                            </div>
+                        </div>
                     </div>
                 `;
             }
             return html``;
         }
         return html``;
+    }
+
+    renderCopyDay(): TemplateResult {
+            return html`
+                <div class="wrapper" style="white-space: normal; padding-top: 10px;">
+                    <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
+                    <div>
+                        <div class="section-header">
+                            ${this._activeDay ? 'Copy ' + this._activeDay + ' to' : 'Select day to enable copy'}
+                        </div>
+                        <div>
+                            ${(days.concat(SPECIAL_DAYS)).map(day => this.renderCopyToButton(day))}
+                        </div>
+                    </div>
+                </div>
+            `;
+    }
+
+    renderCopyToButton(day: string): TemplateResult {
+        return html`
+            <mwc-button
+                id=${day}
+                @click=${this._copyDay}
+                ?disabled=${this._activeDay == day || !this._activeDay}
+            >
+                ${days.includes(day) ? days_short[days.indexOf(day)] : day}
+            </mwc-button>
+        `;
     }
 
     renderTooltip(day: ScheduleDay, i: number): TemplateResult {
@@ -356,6 +400,23 @@ export class ScheduleSlotEditor extends LitElement {
             });
             this.dispatchEvent(myEvent);
         }
+    }
+
+    private _copyDay(ev): void {
+        const target = ev.target
+        const slotData = JSON.stringify(this.schedule!.ScheduleData[days.indexOf(this._activeDay!)].slots)
+        if (days.includes(target.id)) {
+            this.schedule!.ScheduleData[days.indexOf(target.id)].slots = JSON.parse(slotData)
+        } else if(target.id == SPECIAL_DAYS[0]) {
+            weekdays.map(day => {
+                this.schedule!.ScheduleData[days.indexOf(day)].slots = JSON.parse(slotData)
+            })
+        } else if(target.id == SPECIAL_DAYS[1]) {
+            weekends.map(day => {
+                this.schedule!.ScheduleData[days.indexOf(day)].slots = JSON.parse(slotData)
+            })
+        }
+        this.requestUpdate();
     }
 
     _updateSetPoint(setpoint: string | number): void {
@@ -754,10 +815,10 @@ export class ScheduleSlotEditor extends LitElement {
                 margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
             display: flex;
             }
-            div.assignment-wrapper {
-            border-top: 1px solid var(--divider-color, #e8e8e8);
-            padding: 5px 0px;
-            min-height: 40px;
+            div.sub-section {
+                display: flex;
+                justify-content: center;
+                width: 100%;
             }
             .special-times {
                 justify-content: flex-end;
@@ -1025,7 +1086,6 @@ export class ScheduleSlotEditor extends LitElement {
         }
 
         mwc-button.state-button {
-            width: 20%;
 			padding: 0px 18px;
 			margin: 0 2px;
 			max-width: 100px;

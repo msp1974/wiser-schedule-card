@@ -586,9 +586,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
             margin-bottom: 2px;
             display: flex;
         }
-        .slots-wrapper {
-              padding-bottom: 20px;
-          }
+
         .setpoint.rotate {
             z-index: 3;
             transform: rotate(-90deg);
