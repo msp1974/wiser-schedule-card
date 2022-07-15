@@ -36,20 +36,12 @@ export class VariableSlider extends LitElement {
   @property({ type: Number })
   _displayedValue = 0;
 
-
-
   render(): TemplateResult {
     return html`
       <div class="checkbox-container">
-        <div class="checkbox">
-          ${this.getCheckbox()}
-        </div>
-        <div class="slider">
-          ${this.getSlider()}
-        </div>
-        <div class="value${this.disabled ? ' disabled' : ''}">
-          ${this._displayedValue}${this.unit}
-        </div>
+        <div class="checkbox">${this.getCheckbox()}</div>
+        <div class="slider">${this.getSlider()}</div>
+        <div class="value${this.disabled ? ' disabled' : ''}">${this._displayedValue}${this.unit}</div>
       </div>
     `;
   }
@@ -82,9 +74,7 @@ export class VariableSlider extends LitElement {
 
   getCheckbox(): TemplateResult {
     if (!this.optional) return html``;
-    return html`
-      <ha-checkbox @change=${this._toggleChecked} ?checked=${!this.disabled}></ha-checkbox>
-    `;
+    return html` <ha-checkbox @change=${this._toggleChecked} ?checked=${!this.disabled}></ha-checkbox> `;
   }
 
   private _toggleChecked(e: Event) {

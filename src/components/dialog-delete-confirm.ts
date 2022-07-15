@@ -28,20 +28,20 @@ export class DialogDeleteConfirm extends LitElement {
         <div slot="heading">
           <ha-header-bar>
             <ha-icon-button slot="navigationIcon" dialogAction="cancel" .path=${mdiClose}> </ha-icon-button>
-            <span slot="title">
-              ${'Confirm Delete'}
-            </span>
+            <span slot="title"> ${'Confirm Delete'} </span>
           </ha-header-bar>
         </div>
-        <div class="wrapper">
-          ${'Are you sure you wish to delete the schedule ' + this._params.name + '?'}
-        </div>
-        <mwc-button class="warning" slot="primaryAction" style="float: left" @click=${this.confirmClick} dialogAction="close">
+        <div class="wrapper">${'Are you sure you wish to delete the schedule ' + this._params.name + '?'}</div>
+        <mwc-button
+          class="warning"
+          slot="primaryAction"
+          style="float: left"
+          @click=${this.confirmClick}
+          dialogAction="close"
+        >
           ${'Delete'}
         </mwc-button>
-        <mwc-button slot="secondaryAction" @click=${this.cancelClick} dialogAction="close">
-          ${'Cancel'}
-        </mwc-button>
+        <mwc-button slot="secondaryAction" @click=${this.cancelClick} dialogAction="close"> ${'Cancel'} </mwc-button>
       </ha-dialog>
     `;
   }
@@ -59,10 +59,9 @@ export class DialogDeleteConfirm extends LitElement {
       div.wrapper {
         color: var(--primary-text-color);
       }
-      mwc-button.warning
-        {
-          --mdc-theme-primary: var(--error-color);
-        }
+      mwc-button.warning {
+        --mdc-theme-primary: var(--error-color);
+      }
     `;
   }
 }

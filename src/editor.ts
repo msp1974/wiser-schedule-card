@@ -33,7 +33,6 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
 
   public setConfig(config: WiserScheduleCardConfig): void {
     this._config = config;
-
     this.loadCardHelpers();
   }
 
@@ -41,7 +40,6 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
     if (!this._initialized) {
       this._initialize();
     }
-
     return true;
   }
 
@@ -58,20 +56,19 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
   }
 
   get _theme_colors(): boolean {
-    return this._config?.theme_colors || false
+    return this._config?.theme_colors || false;
   }
 
   get _show_badges(): boolean {
-    return this._config?.show_badges || false
+    return this._config?.show_badges || false;
   }
 
   get _display_only(): boolean {
-    return this._config?.display_only || false
+    return this._config?.display_only || false;
   }
 
-
   get _admin_only(): boolean {
-    return this._config?.admin_only || false
+    return this._config?.admin_only || false;
   }
 
   async loadData(): Promise<void> {
@@ -82,11 +79,17 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
   }
 
   protected render(): TemplateResult | void {
-    if (!this.hass || !this._helpers || !this._config || !this._hubs  || !this._schedules) {
+    if (!this.hass || !this._helpers || !this._config || !this._hubs || !this._schedules) {
       return html``;
     }
 
     return html`
+      <mwc-textfield
+        label="Title (optional)"
+        .value=${this._name}
+        .configValue=${'name'}
+        @input=${this._valueChanged}
+      ></mwc-textfield>
       ${this.hubSelector()}
       <mwc-select
         naturalMenuWidth
@@ -102,12 +105,6 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
           return html`<mwc-list-item .value=${s.Type + '|' + s.Id}>${s.Name}</mwc-list-item>`;
         })}
       </mwc-select>
-      <mwc-textfield
-        label="Name (Optional)"
-        .value=${this._name}
-        .configValue=${'name'}
-        @input=${this._valueChanged}
-      ></mwc-textfield>
       <mwc-formfield .label=${`Only Allow Display of Schedules`}>
         <mwc-switch
           .checked=${this._display_only !== false}
@@ -123,7 +120,7 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
           @change=${this._valueChanged}
         ></mwc-switch>
       </mwc-formfield>
-      <br>
+      <br />
       <mwc-formfield .label=${`Use Theme Colors`}>
         <mwc-switch
           .checked=${this._theme_colors !== false}
@@ -138,15 +135,13 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
           @change=${this._valueChanged}
         ></mwc-switch>
       </mwc-formfield>
-      <br>
-      <div class="version">
-        Version: ${CARD_VERSION}
-      </div>
+      <br />
+      <div class="version">Version: ${CARD_VERSION}</div>
     `;
   }
 
   private hubSelector() {
-    const hubs = (this._hubs ? this._hubs : []);
+    const hubs = this._hubs ? this._hubs : [];
     if (hubs.length > 1) {
       return html`
         <mwc-select
@@ -159,8 +154,8 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
           @closed=${(ev) => ev.stopPropagation()}
         >
           ${this._hubs?.map((hub) => {
-          return html`<mwc-list-item .value=${hub}>${hub}</mwc-list-item>`;
-        })}
+            return html`<mwc-list-item .value=${hub}>${hub}</mwc-list-item>`;
+          })}
         </mwc-select>
       `;
     }
@@ -177,7 +172,6 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
   private async loadCardHelpers(): Promise<void> {
     this._helpers = await (window as any).loadCardHelpers();
     await this.loadData();
-
   }
 
   private _valueChanged(ev): void {
@@ -200,7 +194,9 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
         };
       }
     }
-    if (target.configValue === 'hub') {this._config.selected_schedule = ''}
+    if (target.configValue === 'hub') {
+      this._config.selected_schedule = '';
+    }
     fireEvent(this, 'config-changed', { config: this._config });
   }
 

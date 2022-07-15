@@ -9,24 +9,13 @@ declare global {
 
 // TODO Add your configuration elements here for type-checking
 export interface WiserScheduleCardConfig extends LovelaceCardConfig {
-    type: string;
-    name?: string;
-    theme_colors: boolean;
-    show_badges: boolean;
-    display_only: boolean;
-    admin_only: boolean,
-    hub: string;
-    selected_schedule?: string;
-}
-
-interface SunTimeDays {
-  Monday: string;
-  Tuesday: string;
-  Wednesday: string;
-  Thursday: string;
-  Friday: string;
-  Saturday: string;
-  Sunday: string;
+  name?: string;
+  theme_colors: boolean;
+  show_badges: boolean;
+  display_only: boolean;
+  admin_only: boolean;
+  hub: string;
+  selected_schedule?: string;
 }
 
 interface SunTime {
@@ -47,7 +36,7 @@ export interface ScheduleSlot {
 
 export interface ScheduleDay {
   day: string;
-  slots: ScheduleSlot[]
+  slots: ScheduleSlot[];
 }
 
 export interface Schedule {
@@ -86,15 +75,16 @@ export interface NewSchedule {
   Type: string;
 }
 
-export enum ETimeEvent {
-  Sunrise = 'sunrise',
-  Sunset = 'sunset',
-}
-
 enum WiserEvent {
-  WiserUpdated = 'wiser_updated'
+  WiserUpdated = 'wiser_updated',
 }
 
 export interface WiserEventData {
+  hub: string;
   event: WiserEvent;
+}
+
+export interface WiserError {
+  code: string;
+  message: string;
 }
