@@ -8,8 +8,7 @@
       "copy": "Copy",
       "files": "Files",
       "rename": "Rename",
-      "add_before": "Add Before",
-      "add_after": "Add After"
+      "add": "Add"
     },
     "headings": {
       "schedule_actions": "Schedule Actions",
