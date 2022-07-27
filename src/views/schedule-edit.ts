@@ -139,20 +139,20 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
   private async loadData() {
     this.error = undefined;
     if (this.schedule_type && this.schedule_id && !this.editMode) {
+      await fetchSunTimes(this.hass!, this.config!.hub)
+        .then((res) => {
+          this.suntimes = res;
+        })
+        .catch((e) => {
+          this.error = e;
+        });
+        
       await fetchScheduleById(this.hass!, this.config!.hub, this.schedule_type!, this.schedule_id!)
         .then((res) => {
           this.schedule = this.convertLoadedSchedule(res);
         })
         .catch((e) => {
           this.schedule = undefined;
-          this.error = e;
-        });
-
-      await fetchSunTimes(this.hass!, this.config!.hub)
-        .then((res) => {
-          this.suntimes = res;
-        })
-        .catch((e) => {
           this.error = e;
         });
 
