@@ -5,9 +5,7 @@ import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
 import { createRef, Ref } from 'lit/directives/ref';
 import { property, customElement, state, eventOptions } from 'lit/decorators.js';
 import { HomeAssistant } from 'custom-card-helpers';
-
 import { mdiRadiatorOff, mdiUnfoldMoreVertical } from '@mdi/js';
-
 import type { WiserScheduleCardConfig, ScheduleSlot, Schedule, ScheduleDay, SunTimes } from '../types';
 import { color_map, getLocale, get_end_time, get_setpoint, stringTimeToSeconds } from '../helpers';
 import {
@@ -242,13 +240,9 @@ export class ScheduleSlotEditor extends LitElement {
       <div class="wrapper" style="white-space: normal;">
         <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
         <div class="sub-section">
-          <mwc-button id=${'add-before'} @click=${this._addSlot} ?disabled=${this._activeSlot < 0 || slotCount >= 24}>
-            <ha-icon id=${'add-before'} icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
-            ${localize('wiser.actions.add_before')}
-          </mwc-button>
-          <mwc-button id=${'add-after'} @click=${this._addSlot} ?disabled=${this._activeSlot < -1 || slotCount >= 24}>
-            <ha-icon id=${'add-after'} icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
-            ${localize('wiser.actions.add_after')}
+          <mwc-button @click=${this._addSlot} ?disabled=${this._activeSlot < -1 || slotCount >= 24}>
+            <ha-icon icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
+            ${localize('wiser.actions.add')}
           </mwc-button>
           <mwc-button @click=${this._removeSlot} ?disabled=${this._activeSlot < 0 || slotCount < 1}>
             <ha-icon icon="hass:minus-circle-outline" class="padded-right"></ha-icon>
@@ -334,12 +328,12 @@ export class ScheduleSlotEditor extends LitElement {
             <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
             <div class="sub-section">
               <div class="section-header">Level</div>
-              <div>
+              <div style="display: flex; line-height: 32px; width: 100%; max-width: 400px;">
                 <wiser-variable-slider
                   min="0"
                   max="100"
                   step="1"
-                  value=${this._activeSlot >= 0 ? parseInt(slots![this._activeSlot!].Setpoint) : 0}
+                  value=${this._activeSlot >= 0 ? parseFloat(slots![this._activeSlot!].Setpoint) : 0}
                   unit="%"
                   .optional=${false}
                   .disabled=${this._activeSlot < 0}
@@ -364,9 +358,9 @@ export class ScheduleSlotEditor extends LitElement {
         <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
         <div>
           <div class="section-header">
-            ${this._activeDay ? 'Copy ' + this._activeDay + ' to' : 'Select day to enable copy'}
+            ${this._activeDay ? 'Copy ' + this._activeDay + ' to' : 'Copy to'}
           </div>
-          <div>${days.concat(SPECIAL_DAYS).map((day) => this.renderCopyToButton(day))}</div>
+          <div>${days.concat(SPECIAL_DAYS).concat('All').map((day) => this.renderCopyToButton(day))}</div>
         </div>
       </div>
     `;
@@ -385,7 +379,7 @@ export class ScheduleSlotEditor extends LitElement {
     const res = SPECIAL_TIMES.includes(slots![i].SpecialTime);
     return html`
       <div class="tooltip-container center">
-        <div class="tooltip ${this._activeSlot === i ? 'active' : ''}" @click=${this._selectMarker}>
+        <div class="tooltip ${this._activeSlot === i ? 'active' : ''}">
           ${res
             ? html`
                 <ha-icon
@@ -429,6 +423,10 @@ export class ScheduleSlotEditor extends LitElement {
       });
     } else if (target.id == SPECIAL_DAYS[1]) {
       weekends.map((day) => {
+        this.schedule!.ScheduleData[days.indexOf(day)].slots = JSON.parse(slotData);
+      });
+    } else if (target.id == 'All') {
+      days.map((day) => {
         this.schedule!.ScheduleData[days.indexOf(day)].slots = JSON.parse(slotData);
       });
     }
@@ -513,18 +511,14 @@ export class ScheduleSlotEditor extends LitElement {
     }
   }
 
-  private _addSlot(ev) {
-    const add_before = ev.target.id === 'add-before' ? true : false;
+  private _addSlot() {
     if (this._activeSlot < -1) return;
 
     const activeDayIndex = days.indexOf(this._activeDay);
     if (this._activeSlot < 0) {
       this.schedule!.ScheduleData[activeDayIndex].slots = [
         {
-          Time: formatTime(
-            stringToDate(timeToString(stringToTime('06:00'))),
-            getLocale(this.hass!),
-          ).padStart(5, '0'),
+          Time: formatTime(stringToDate(timeToString(stringToTime('06:00'))), getLocale(this.hass!)).padStart(5, '0'),
           Setpoint: DefaultSetpoint[this.schedule_type!],
           SpecialTime: '',
         },
@@ -533,53 +527,40 @@ export class ScheduleSlotEditor extends LitElement {
     } else {
       const activeSlot = this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot];
       let startTime = stringToTime(activeSlot.Time);
-      let endTime = stringToTime(
-        get_end_time(this.schedule!.ScheduleData[activeDayIndex], this._activeSlot),
-      );
+      let endTime = stringToTime(get_end_time(this.schedule!.ScheduleData[activeDayIndex], this._activeSlot));
       if (endTime < startTime) endTime += SEC_PER_DAY;
       const newStop = roundTime(startTime + (endTime - startTime) / 2, this.stepSize);
 
-      if (add_before) {
-        if (!activeSlot.SpecialTime) {
-          console.log('Normal path', activeSlot);
-          this.schedule!.ScheduleData[activeDayIndex].slots = [
-            ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
-            {
-              Time: formatTime(stringToDate(timeToString(startTime)), getLocale(this.hass!)).padStart(5, '0'),
-              Setpoint: DefaultSetpoint[this.schedule_type!],
-              SpecialTime: '',
-            },
-            {
-              ...this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot!],
-              Time: formatTime(stringToDate(timeToString(newStop)), getLocale(this.hass!)),
-            },
-            ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(this._activeSlot + 1),
-          ];
-        } else {
-          startTime = roundTime(startTime - stringToTime('01:00'), this.stepSize);
-          this.schedule!.ScheduleData[activeDayIndex].slots = [
-            ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
-            {
-              Time: formatTime(stringToDate(timeToString(startTime)), getLocale(this.hass!)).padStart(5, '0'),
-              Setpoint: DefaultSetpoint[this.schedule_type!],
-              SpecialTime: '',
-            },
-            ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(this._activeSlot),
-          ];
-        }
-      } else {
+      if (!activeSlot.SpecialTime) {
+        console.log('Normal path', activeSlot);
         this.schedule!.ScheduleData[activeDayIndex].slots = [
-          ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot + 1),
+          ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
           {
-            Time: formatTime(stringToDate(timeToString(newStop)), getLocale(this.hass!)).padStart(5, '0'),
-            Setpoint: DefaultSetpoint[this.schedule_type!],
+            Time: formatTime(stringToDate(timeToString(startTime)), getLocale(this.hass!)).padStart(5, '0'),
+            Setpoint: activeSlot.Setpoint,
             SpecialTime: '',
           },
-          ...this.schedule!.ScheduleData[activeDayIndex].slots!.slice(this._activeSlot + 1),
+          {
+            ...this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot!],
+            Time: formatTime(stringToDate(timeToString(newStop)), getLocale(this.hass!)),
+          },
+          ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(this._activeSlot + 1),
         ];
-        this._activeSlot++;
+      } else {
+        startTime = roundTime(startTime - stringToTime('01:00'), this.stepSize);
+        this.schedule!.ScheduleData[activeDayIndex].slots = [
+          ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
+          {
+            Time: formatTime(stringToDate(timeToString(startTime)), getLocale(this.hass!)).padStart(5, '0'),
+            Setpoint: activeSlot.Setpoint,
+            SpecialTime: '',
+          },
+          ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(this._activeSlot),
+        ];
       }
+      this._activeSlot++;
     }
+
     const myEvent = new CustomEvent('scheduleChanged', {
       detail: { schedule: this.schedule },
     });
@@ -698,86 +679,6 @@ export class ScheduleSlotEditor extends LitElement {
     window.addEventListener('blur', mouseUpHandler);
     window.addEventListener('mousemove', mouseMoveHandler);
     window.addEventListener('touchmove', mouseMoveHandler);
-  }
-
-  private _selectMarker(ev: Event, enable = true) {
-    ev.stopImmediatePropagation();
-    let el = ev.target as HTMLElement;
-    while (!el.classList.contains('slot')) el = el.parentElement as HTMLElement;
-    const slot = Number(el.getAttribute('slot'));
-    if (enable && this.activeMarker === slot) this.activeMarker = null;
-    else this.activeMarker = enable ? slot : null;
-    const myEvent = new CustomEvent('update', {
-      detail: { entry: this._activeSlot, marker: this.activeMarker },
-    });
-    this.dispatchEvent(myEvent);
-    this._updateTooltips();
-  }
-
-  private _updateTooltips() {
-    const fullWidth = parseFloat(getComputedStyle(this).getPropertyValue('width'));
-    const tooltips = this.shadowRoot?.querySelectorAll('.tooltip') as unknown as HTMLElement[];
-
-    const getBounds = (el: HTMLElement) => {
-      const width = el.offsetWidth;
-      const left = el.parentElement!.offsetLeft + el.offsetLeft - 15;
-      if (el.parentElement!.classList.contains('left')) return [left + width / 2, left + (3 * width) / 2];
-      else if (el.parentElement!.classList.contains('right')) return [left - width / 2, left + width / 2];
-      return [left, left + width];
-    };
-
-    tooltips?.forEach((tooltip, i) => {
-      const container = tooltip.parentElement!;
-      const visible = container.classList.contains('visible');
-      const slot = Number(container.parentElement!.getAttribute('slot'));
-
-      if (slot != this._activeSlot && slot - 1 != this._activeSlot) {
-        if (visible) container.classList.remove('visible');
-      } else {
-        const left = tooltip.parentElement!.offsetLeft;
-        if (left < 0 || left > fullWidth + 15) {
-          if (visible) container.classList.remove('visible');
-        } else {
-          if (!visible) container.classList.add('visible');
-          const width = container.offsetWidth;
-          const isCenter = container.classList.contains('center');
-          let marginLeft = getBounds(tooltip)[0],
-            marginRight = fullWidth - getBounds(tooltip)[1];
-
-          if (i > 0 && slot - 1 == this._activeSlot) marginLeft -= getBounds(tooltips[i - 1])[1];
-          else if (i + 1 < tooltips.length && slot == this._activeSlot) {
-            const w = getBounds(tooltips[i + 1])[0];
-            marginRight -= w < 0 ? 0 : fullWidth - w;
-          }
-
-          if (marginLeft < marginRight) {
-            if (marginLeft < 0) {
-              if (isCenter && marginRight > width / 2) {
-                container.classList.add('right');
-                container.classList.remove('center');
-                container.classList.remove('left');
-              }
-            } else {
-              container.classList.add('center');
-              container.classList.remove('right');
-              container.classList.remove('left');
-            }
-          } else {
-            if (marginRight < 0) {
-              if (isCenter && marginLeft > width / 2) {
-                container.classList.add('left');
-                container.classList.remove('center');
-                container.classList.remove('right');
-              }
-            } else {
-              container.classList.add('center');
-              container.classList.remove('left');
-              container.classList.remove('right');
-            }
-          }
-        }
-      }
-    });
   }
 
   computeDayLabel(day: string): TemplateResult {
