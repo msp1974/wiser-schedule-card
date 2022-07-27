@@ -29,6 +29,7 @@ console.info(
   type: 'wiser-schedule-card',
   name: 'Wiser Schedule Card',
   description: 'A card to manage Wiser schedules',
+  preview: false,
 });
 
 @customElement('wiser-schedule-card')
