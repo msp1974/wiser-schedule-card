@@ -297,7 +297,7 @@ export class ScheduleSlotEditor extends LitElement {
         `;
       } else if (this.schedule_type == 'OnOff') {
         return html`
-          <div class="wrapper" style="white-space: normal; height: 36px;">
+          <div class="wrapper" style="height: 36px;">
             <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
             <div class="sub-section">
               <div class="section-header">State</div>
@@ -990,7 +990,7 @@ export class ScheduleSlotEditor extends LitElement {
       }
 
       mwc-button.state-button {
-        padding: 0px 18px;
+        padding: 0px 10px;
         margin: 0 2px;
         max-width: 100px;
       }
