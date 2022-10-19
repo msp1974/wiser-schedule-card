@@ -22,6 +22,13 @@ export function timeToString(time: number): string {
   );
 }
 
+export function timeToStringShort(time: number): string {
+  const hours = Math.floor(time / 3600);
+  time -= hours * 3600;
+  const minutes = Math.floor(time / 60);
+  return String(hours % 24).padStart(2, '0') + ':' + String(minutes).padStart(2, '0');
+}
+
 export function roundTime(
   value: number,
   stepSize: number,

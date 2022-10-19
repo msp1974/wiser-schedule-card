@@ -23,7 +23,7 @@ import {
   weekends,
 } from '../const';
 import './dialog-delete-confirm';
-import { roundTime, stringToTime, timeToString } from '../data/date-time/time';
+import { roundTime, stringToTime, timeToString, timeToStringShort } from '../data/date-time/time';
 import { formatTime } from '../data/date-time/format_time';
 import { stringToDate } from '../data/date-time/string_to_date';
 import './variable-slider';
@@ -357,10 +357,13 @@ export class ScheduleSlotEditor extends LitElement {
       <div class="wrapper" style="white-space: normal; padding-top: 10px;">
         <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
         <div>
-          <div class="section-header">
-            ${this._activeDay ? 'Copy ' + this._activeDay + ' to' : 'Copy to'}
+          <div class="section-header">${this._activeDay ? 'Copy ' + this._activeDay + ' to' : 'Copy to'}</div>
+          <div>
+            ${days
+              .concat(SPECIAL_DAYS)
+              .concat('All')
+              .map((day) => this.renderCopyToButton(day))}
           </div>
-          <div>${days.concat(SPECIAL_DAYS).concat('All').map((day) => this.renderCopyToButton(day))}</div>
         </div>
       </div>
     `;
@@ -385,9 +388,9 @@ export class ScheduleSlotEditor extends LitElement {
                 <ha-icon
                   icon="hass:${slots![i].SpecialTime == SPECIAL_TIMES[0] ? 'weather-sunny' : 'weather-night'}"
                 ></ha-icon>
-                ${slots![i].SpecialTime}
+                ${formatTime(stringToDate(timeToString(stringToTime(slots![i].SpecialTime))), getLocale(this.hass!))}
               `
-            : slots![i].Time}
+            : formatTime(stringToDate(timeToString(stringToTime(slots![i].Time))), getLocale(this.hass!))}
         </div>
       </div>
     `;
@@ -518,7 +521,7 @@ export class ScheduleSlotEditor extends LitElement {
     if (this._activeSlot < 0) {
       this.schedule!.ScheduleData[activeDayIndex].slots = [
         {
-          Time: formatTime(stringToDate(timeToString(stringToTime('06:00'))), getLocale(this.hass!)).padStart(5, '0'),
+          Time: timeToStringShort(stringToTime('06:00')),
           Setpoint: DefaultSetpoint[this.schedule_type!],
           SpecialTime: '',
         },
@@ -532,17 +535,16 @@ export class ScheduleSlotEditor extends LitElement {
       const newStop = roundTime(startTime + (endTime - startTime) / 2, this.stepSize);
 
       if (!activeSlot.SpecialTime) {
-        console.log('Normal path', activeSlot);
         this.schedule!.ScheduleData[activeDayIndex].slots = [
           ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
           {
-            Time: formatTime(stringToDate(timeToString(startTime)), getLocale(this.hass!)).padStart(5, '0'),
+            Time: timeToStringShort(startTime),
             Setpoint: activeSlot.Setpoint,
             SpecialTime: '',
           },
           {
             ...this.schedule!.ScheduleData[activeDayIndex].slots[this._activeSlot!],
-            Time: formatTime(stringToDate(timeToString(newStop)), getLocale(this.hass!)),
+            Time: timeToStringShort(newStop),
           },
           ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(this._activeSlot + 1),
         ];
@@ -551,7 +553,7 @@ export class ScheduleSlotEditor extends LitElement {
         this.schedule!.ScheduleData[activeDayIndex].slots = [
           ...this.schedule!.ScheduleData[activeDayIndex].slots.slice(0, this._activeSlot),
           {
-            Time: formatTime(stringToDate(timeToString(startTime)), getLocale(this.hass!)).padStart(5, '0'),
+            Time: timeToStringShort(startTime),
             Setpoint: activeSlot.Setpoint,
             SpecialTime: '',
           },
@@ -559,6 +561,7 @@ export class ScheduleSlotEditor extends LitElement {
         ];
       }
       this._activeSlot++;
+      console.log(this.schedule);
     }
 
     const myEvent = new CustomEvent('scheduleChanged', {
@@ -641,7 +644,7 @@ export class ScheduleSlotEditor extends LitElement {
       this.currentTime = time;
 
       time = Math.round(time) >= SEC_PER_DAY ? SEC_PER_DAY : roundTime(time, this.stepSize);
-      const timeString = formatTime(stringToDate(timeToString(time)), getLocale(this.hass!)).padStart(5, '0');
+      const timeString = timeToStringShort(time);
 
       if (timeString == get_end_time(this.schedule!.ScheduleData[activeDayIndex], i)) return;
 
