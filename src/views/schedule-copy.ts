@@ -7,6 +7,7 @@ import { copySchedule, fetchScheduleById, fetchSchedules } from '../data/websock
 import { EViews } from '../const';
 
 import '../components/dialog-delete-confirm';
+import { localize } from '../localize/localize';
 
 @customElement('wiser-schedule-copy-card')
 export class ScheduleCopyCard extends LitElement {
@@ -53,11 +54,17 @@ export class ScheduleCopyCard extends LitElement {
           <div class="name">${this.config!.name}</div>
         </div>
         <div class="card-content">
-          <div>Copy Schedule</div>
-          <div class="schedule-info"><span class="sub-heading">Schedule Type:</span> ${this.schedule.Type}</div>
-          <div class="schedule-info"><span class="sub-heading">Schedule Id:</span> ${this.schedule.Id}</div>
-          <div class="schedule-info"><span class="sub-heading">Schedule Name:</span> ${this.schedule.Name}</div>
-          <div class="wrapper" style="margin: 20px 0 0 0;">${'Select the schedule below to copy to'}</div>
+          <div>${localize('wiser.headings.copy_schedule')}</div>
+          <div class="schedule-info">
+            <span class="sub-heading">${localize('wiser.headings.schedule_type')}:</span> ${this.schedule.Type}
+          </div>
+          <div class="schedule-info">
+            <span class="sub-heading">${localize('wiser.headings.schedule_id')}:</span> ${this.schedule.Id}
+          </div>
+          <div class="schedule-info">
+            <span class="sub-heading">${localize('wiser.headings.schedule_name')}:</span> ${this.schedule.Name}
+          </div>
+          <div class="wrapper" style="margin: 20px 0 0 0;">${localize('wiser.helpers.select_copy_schedule')}</div>
           <div class="assignment-wrapper">
             ${this._schedule_list
               .filter((schedule) => schedule.Id != this.schedule?.Id)
@@ -65,7 +72,7 @@ export class ScheduleCopyCard extends LitElement {
           </div>
         </div>
         <div class="card-actions">
-          <mwc-button @click=${this.cancelClick}> ${'Cancel'} </mwc-button>
+          <mwc-button @click=${this.cancelClick}> ${this.hass.localize('ui.common.cancel')} </mwc-button>
         </div>
       </ha-card>
     `;

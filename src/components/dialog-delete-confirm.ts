@@ -4,6 +4,7 @@ import { LitElement, html, css, CSSResultGroup } from 'lit';
 import { property, customElement, state } from 'lit/decorators.js';
 import { HomeAssistant } from 'custom-card-helpers';
 import { mdiClose } from '@mdi/js';
+import { localize } from '../localize/localize';
 
 @customElement('wiser-dialog-delete-confirm')
 export class DialogDeleteConfirm extends LitElement {
@@ -28,10 +29,10 @@ export class DialogDeleteConfirm extends LitElement {
         <div slot="heading">
           <ha-header-bar>
             <ha-icon-button slot="navigationIcon" dialogAction="cancel" .path=${mdiClose}> </ha-icon-button>
-            <span slot="title"> ${'Confirm Delete'} </span>
+            <span slot="title"> ${localize('wiser.headings.delete_schedule')} </span>
           </ha-header-bar>
         </div>
-        <div class="wrapper">${'Are you sure you wish to delete the schedule ' + this._params.name + '?'}</div>
+        <div class="wrapper">${localize('wiser.helpers.delete_schedule_confirm') + ' ' + this._params.name + '?'}</div>
         <mwc-button
           class="warning"
           slot="primaryAction"
@@ -39,9 +40,11 @@ export class DialogDeleteConfirm extends LitElement {
           @click=${this.confirmClick}
           dialogAction="close"
         >
-          ${'Delete'}
+          ${this.hass.localize('ui.common.delete')}
         </mwc-button>
-        <mwc-button slot="secondaryAction" @click=${this.cancelClick} dialogAction="close"> ${'Cancel'} </mwc-button>
+        <mwc-button slot="secondaryAction" @click=${this.cancelClick} dialogAction="close">
+          ${this.hass.localize('ui.common.cancel')}
+        </mwc-button>
       </ha-dialog>
     `;
   }

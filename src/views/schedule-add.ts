@@ -6,6 +6,7 @@ import type { WiserScheduleCardConfig, NewSchedule } from '../types';
 import { createSchedule, fetchScheduleTypes } from '../data/websockets';
 
 import '../components/dialog-delete-confirm';
+import { localize } from '../localize/localize';
 
 @customElement('wiser-schedule-add-card')
 export class ScheduleAddCard extends LitElement {
@@ -70,9 +71,9 @@ export class ScheduleAddCard extends LitElement {
             @click=${this.confirmClick}
             dialogAction="close"
           >
-            ${'Ok'}
+            ${this.hass.localize('ui.common.save')}
           </mwc-button>
-          <mwc-button @click=${this.cancelClick}> ${'Cancel'} </mwc-button>
+          <mwc-button @click=${this.cancelClick}> ${this.hass.localize('ui.common.cancel')} </mwc-button>
         </div>
       </ha-card>
     `;

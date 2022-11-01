@@ -137,7 +137,17 @@ export class ScheduleSlotEditor extends LitElement {
       : 'rgba(' + color_map(this, this.schedule_type!, setpoint) + ')';
     const width = ((stringTimeToSeconds(end_time) - stringTimeToSeconds(start_time)) / SEC_PER_DAY) * 100;
     const title =
-      'Start - ' + start_time + '\nEnd - ' + end_time + '\nSetting - ' + this.computeSetpointLabel(setpoint);
+      localize('wiser.labels.start') +
+      ' - ' +
+      start_time +
+      '\n' +
+      localize('wiser.labels.end') +
+      ' - ' +
+      end_time +
+      '\n' +
+      localize('wiser.labels.setting') +
+      ' - ' +
+      this.computeSetpointLabel(setpoint);
     const label_class = (width / 100) * fullWidth < 35 ? 'setpoint rotate' : 'setpoint';
     return html`
       <div
@@ -169,11 +179,16 @@ export class ScheduleSlotEditor extends LitElement {
     const fullWidth = parseFloat(getComputedStyle(this).getPropertyValue('width'));
     const label_class = (width / 100) * fullWidth < 35 ? 'setpoint rotate' : 'setpoint';
     const title =
-      'Start - ' +
+      localize('wiser.labels.start') +
+      ' - ' +
       (slot.SpecialTime ? slot.SpecialTime + ' (' + start_time + ')' : start_time) +
-      '\nEnd - ' +
+      '\n' +
+      localize('wiser.labels.end') +
+      ' - ' +
       end_time +
-      '\nSetting - ' +
+      '\n' +
+      localize('wiser.labels.setting') +
+      ' - ' +
       this.computeSetpointLabel(setpoint);
 
     return html`
@@ -357,7 +372,11 @@ export class ScheduleSlotEditor extends LitElement {
       <div class="wrapper" style="white-space: normal; padding-top: 10px;">
         <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
         <div>
-          <div class="section-header">${this._activeDay ? 'Copy ' + this._activeDay + ' to' : 'Copy to'}</div>
+          <div class="section-header">
+            ${this._activeDay
+              ? localize('wiser.actions.copy') + ' ' + localize('wiser.days.' + this._activeDay.toLowerCase)
+              : localize('wiser.actions.copy')}
+          </div>
           <div>
             ${days
               .concat(SPECIAL_DAYS)
@@ -372,7 +391,9 @@ export class ScheduleSlotEditor extends LitElement {
   renderCopyToButton(day: string): TemplateResult {
     return html`
       <mwc-button id=${day} @click=${this._copyDay} ?disabled=${this._activeDay == day || !this._activeDay}>
-        ${days.includes(day) && this._show_short_days ? days_short[days.indexOf(day)] : day}
+        ${days.includes(day) && this._show_short_days
+          ? localize('wiser.days.short.' + day.toLowerCase())
+          : localize('wiser.days.' + day.toLowerCase())}
       </mwc-button>
     `;
   }
@@ -687,7 +708,9 @@ export class ScheduleSlotEditor extends LitElement {
   computeDayLabel(day: string): TemplateResult {
     return html`
       <div class="day  ${this._show_short_days ? 'short' : ''}">
-        ${this._show_short_days ? days_short[days.indexOf(day)] : day}
+        ${this._show_short_days
+          ? localize('wiser.days.short.' + day.toLowerCase())
+          : localize('wiser.days.' + day.toLowerCase())}
       </div>
     `;
   }

@@ -1,14 +1,45 @@
 {
   "common": {
     "version": "Version",
-    "invalid_configuration": "Invalid configuration"
+    "invalid_configuration": "Invalid configuration",
+    "no_schedules": "No Schedules Found"
   },
   "wiser": {
     "actions": {
       "copy": "Copy",
       "files": "Files",
       "rename": "Rename",
-      "add": "Add"
+      "add": "Add",
+      "view": "View",
+      "add_schedule": "Add Schedule"
+    },
+    "labels": {
+      "setting": "Setting",
+      "name": "Name",
+      "assigns": "Assigns",
+      "start": "Start",
+      "end": "End"
+    },
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday",
+      "weekdays": "Weekdays",
+      "weekend": "Weekend",
+      "all": "All",
+      "short": {
+        "monday": "Mon",
+        "tuesday": "Tue",
+        "wednesday": "Wed",
+        "thursday": "Thu",
+        "friday": "Fri",
+        "saturday": "Sat",
+        "sunday": "Sun"
+      }
     },
     "headings": {
       "schedule_actions": "Schedule Actions",
@@ -16,7 +47,16 @@
       "schedule_id": "Schedule Id",
       "schedule_name": "Schedule Name",
       "schedule_assignment": "Schedule Assignment",
-      "not_assigned": "(Not Assigned)"
+      "not_assigned": "(Not Assigned)",
+      "rename_schedule": "Rename Schedule",
+      "copy_schedule": "Copy Schedule",
+      "delete_schedule": "Delete Schedule"
+    },
+    "helpers": {
+      "enter_new_name": "Enter the new name for the Schedule",
+      "select_copy_schedule": "Select the schedule below to copy to",
+      "delete_schedule_confirm": "Are you sure you wish to delete the schedule",
+      "select_a_schedule": "Select a schedule to view"
     }
   }
 }

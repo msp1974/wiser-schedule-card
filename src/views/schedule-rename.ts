@@ -6,6 +6,7 @@ import type { WiserScheduleCardConfig, Schedule } from '../types';
 import { fetchScheduleById, renameSchedule } from '../data/websockets';
 import '../components/dialog-delete-confirm';
 import { EViews } from '../const';
+import { localize } from '../localize/localize';
 
 @customElement('wiser-schedule-rename-card')
 export class ScheduleRenameCard extends LitElement {
@@ -52,13 +53,13 @@ export class ScheduleRenameCard extends LitElement {
           <div class="name">${this.config!.name}</div>
         </div>
         <div class="card-content">
-          <div>Rename Schedule</div>
-          <div class="wrapper">${'Enter the new schedule name'}</div>
+          <div>${localize('wiser.headings.rename_schedule')}</div>
+          <div class="wrapper">${localize('wiser.helpers.enter_new_name')}</div>
           <ha-textfield
             class="schedule-name"
             auto-validate
             required
-            label="Schedule Name"
+            label=${localize('wiser.headings.schedule_name')}
             value=${this._schedule!.Name}
             error-message="Name is required"
             .configValue=${'Name'}
@@ -74,9 +75,9 @@ export class ScheduleRenameCard extends LitElement {
           >
             ${this._rename_in_progress
               ? html`<span class="waiting"><ha-circular-progress active size="small"></ha-circular-progress></span>`
-              : 'OK'}
+              : this.hass!.localize('ui.common.save')}
           </mwc-button>
-          <mwc-button @click=${this.cancelClick}> ${'Cancel'} </mwc-button>
+          <mwc-button @click=${this.cancelClick}> ${this.hass!.localize('ui.common.cancel')} </mwc-button>
         </div>
       </ha-card>
     `;

@@ -146,7 +146,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
         .catch((e) => {
           this.error = e;
         });
-        
+
       await fetchScheduleById(this.hass!, this.config!.hub, this.schedule_type!, this.schedule_id!)
         .then((res) => {
           this.schedule = this.convertLoadedSchedule(res);
@@ -342,11 +342,11 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
   }
 
   renderBackButton(): TemplateResult | void {
-    return html` <mwc-button @click=${this.backClick}>Back </mwc-button> `;
+    return html` <mwc-button @click=${this.backClick}>${this.hass!.localize('ui.common.back')} </mwc-button> `;
   }
 
   renderCancelButton(): TemplateResult | void {
-    return html` <mwc-button @click=${this.cancelClick}>Cancel </mwc-button> `;
+    return html` <mwc-button @click=${this.cancelClick}>${this.hass!.localize('ui.common.cancel')}</mwc-button> `;
   }
 
   renderScheduleRenameButton(): TemplateResult {
@@ -397,7 +397,9 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
     if (allow_edit(this.hass!, this.config)) {
       return html`
         <mwc-button class="right" @click=${this.saveClick}>
-          ${this._save_in_progress ? html`<ha-circular-progress active size="small"></ha-circular-progress>` : 'Save'}
+          ${this._save_in_progress
+            ? html`<ha-circular-progress active size="small"></ha-circular-progress>`
+            : this.hass!.localize('ui.common.save')}
         </mwc-button>
       `;
     }

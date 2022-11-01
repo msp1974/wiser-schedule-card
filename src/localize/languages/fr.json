@@ -1,22 +1,62 @@
 {
   "common": {
     "version": "Déclinaison",
-    "invalid_configuration": "Configuration Invalide"
+    "invalid_configuration": "Configuration Invalide",
+    "no_schedules": "Aucun Programme Trouvé"
   },
   "wiser": {
     "actions": {
       "copy": "Copie",
       "files": "Fichier",
       "rename": "Renommer",
-      "add": "Ajouter"
+      "add": "Ajouter",
+      "view": "Voir",
+      "add_schedule": "Ajouter un Programme"
+    },
+    "labels": {
+      "setting": "Paramètre",
+      "name": "Nom",
+      "assigns": "Attribuers",
+      "start": "Début",
+      "end": "Fin"
+    },
+    "days": {
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche",
+      "weekdays": "Lun à Ven",
+      "weekend": "Sam et Dim",
+      "all": "Toute",
+      "short": {
+        "monday": "Lun",
+        "tuesday": "Mar",
+        "wednesday": "Mer",
+        "thursday": "Jeu",
+        "friday": "Ven",
+        "saturday": "Sam",
+        "sunday": "Dim"
+      }
     },
     "headings": {
-      "schedule_actions": "Schedule Actions",
-      "schedule_type": "Schedule Type",
-      "schedule_id": "Schedule Id",
-      "schedule_name": "Schedule Name",
-      "schedule_assignment": "Schedule Assignment",
-      "not_assigned": "(Not Assigned)"
+      "schedule_actions": "Programmer des Actions",
+      "schedule_type": "Type de Programme",
+      "schedule_id": "Numéro de Programme",
+      "schedule_name": "Nom de Programme",
+      "schedule_assignment": "Attribuer de Programme",
+      "not_assigned": "(Non Attribué)",
+      "rename_schedule": "Renommer le Programme",
+      "copy_schedule": "Copier le Programme",
+      "delete_schedule": "Supprimer le Programme"
+    },
+    "helpers": {
+      "enter_new_name": "Entrez un nom pour le Programme",
+      "select_copy_schedule": "Sélectionnez le calendrier ci-dessous pour le copier",
+      "delete_schedule_confirm": "Êtes-vous sûr de vouloir effacer ce programme",
+      "select_a_schedule": "Sélectionner un programme à afficher"
     }
   }
 }
