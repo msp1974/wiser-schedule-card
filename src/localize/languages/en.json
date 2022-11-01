@@ -2,7 +2,8 @@
   "common": {
     "version": "Version",
     "invalid_configuration": "Invalid configuration",
-    "no_schedules": "No Schedules Found"
+    "no_schedules": "No Schedules Found",
+    "name_required": "Name is required"
   },
   "wiser": {
     "actions": {
@@ -57,7 +58,8 @@
       "enter_new_name": "Enter the new name for the Schedule",
       "select_copy_schedule": "Select the schedule below to copy to",
       "delete_schedule_confirm": "Are you sure you wish to delete the schedule",
-      "select_a_schedule": "Select a schedule to view"
+      "select_a_schedule": "Select a schedule to view",
+      "add_schedule": "Select the schedule type and enter a name for the schedule to create"
     }
   }
 }

@@ -50,15 +50,15 @@ export class ScheduleAddCard extends LitElement {
           <div class="name">${this.config!.name}</div>
         </div>
         <div class="card-content">
-          <div>Add Schedule</div>
-          <div class="wrapper">${'Select the schedule type and enter a name for the schedule to create'}</div>
+          <div>${localize('wiser.actions.add_schedule')}</div>
+          <div class="wrapper" style="white-space: normal">${localize('wiser.helpers.add_schedule')}</div>
           <div class="wrapper">${this._schedule_types.map((t, i) => this.renderScheduleTypeButtons(t, i))}</div>
           <ha-textfield
             class="schedule-name"
             auto-validate
             required
-            label="Schedule Name"
-            error-message="Name is required"
+            label=${localize('wiser.headings.schedule_name')}
+            error-message=${localize('wiser.common.name_required')}
             .configValue=${'Name'}
             @input=${this._valueChanged}
           >

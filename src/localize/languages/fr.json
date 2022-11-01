@@ -2,7 +2,8 @@
   "common": {
     "version": "Déclinaison",
     "invalid_configuration": "Configuration Invalide",
-    "no_schedules": "Aucun Programme Trouvé"
+    "no_schedules": "Aucun Programme Trouvé",
+    "name_required": "Nom est obligatoire"
   },
   "wiser": {
     "actions": {
@@ -57,7 +58,8 @@
       "enter_new_name": "Entrez un nom pour le Programme",
       "select_copy_schedule": "Sélectionnez le calendrier ci-dessous pour le copier",
       "delete_schedule_confirm": "Êtes-vous sûr de vouloir effacer ce programme",
-      "select_a_schedule": "Sélectionner un programme à afficher"
+      "select_a_schedule": "Sélectionner un programme à afficher",
+      "add_schedule": "Sélectionnez le type de programme et entrez un nom pour la programme à créer"
     }
   }
 }
