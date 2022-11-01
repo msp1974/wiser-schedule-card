@@ -18,7 +18,8 @@
       "name": "Nom",
       "assigns": "Attribuers",
       "start": "Début",
-      "end": "Fin"
+      "end": "Fin",
+      "to": "à"
     },
     "days": {
       "monday": "Lundi",

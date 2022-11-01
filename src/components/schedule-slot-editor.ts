@@ -374,8 +374,12 @@ export class ScheduleSlotEditor extends LitElement {
         <div>
           <div class="section-header">
             ${this._activeDay
-              ? localize('wiser.actions.copy') + ' ' + localize('wiser.days.' + this._activeDay.toLowerCase)
-              : localize('wiser.actions.copy')}
+              ? localize('wiser.actions.copy') +
+                ' ' +
+                localize('wiser.days.' + this._activeDay.toLowerCase()) +
+                ' ' +
+                localize('wiser.labels.to')
+              : localize('wiser.actions.copy') + ' ' + localize('wiser.labels.to')}
           </div>
           <div>
             ${days

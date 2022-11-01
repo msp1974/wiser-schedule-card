@@ -18,7 +18,8 @@
       "name": "Name",
       "assigns": "Assigns",
       "start": "Start",
-      "end": "End"
+      "end": "End",
+      "to": "to"
     },
     "days": {
       "monday": "Monday",
