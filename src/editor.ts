@@ -9,7 +9,7 @@ import { formfieldDefinition } from '../elements/formfield';
 import { selectDefinition } from '../elements/select';
 import { switchDefinition } from '../elements/switch';
 import { textfieldDefinition } from '../elements/textfield';
-
+import { capitalize } from './helpers';
 import { fetchHubs, fetchSchedules } from './data/websockets';
 import { CARD_VERSION } from './const';
 
@@ -63,12 +63,20 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
     return this._config?.show_badges || false;
   }
 
+  get _show_schedule_id(): boolean {
+    return this._config?.show_schedule_id || false;
+  }
+
   get _display_only(): boolean {
     return this._config?.display_only || false;
   }
 
   get _admin_only(): boolean {
     return this._config?.admin_only || false;
+  }
+
+  get _view_type(): string {
+    return this._config?.view_type || 'default';
   }
 
   async loadData(): Promise<void> {
@@ -105,6 +113,20 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
           return html`<mwc-list-item .value=${s.Type + '|' + s.Id}>${s.Name}</mwc-list-item>`;
         })}
       </mwc-select>
+      <mwc-select
+        naturalMenuWidth
+        fixedMenuPosition
+        label="View"
+        .configValue=${'view_type'}
+        .value=${this._view_type}
+        @selected=${this._valueChanged}
+        @closed=${(ev) => ev.stopPropagation()}
+      >
+        <mwc-list-item></mwc-list-item>
+        ${['default', 'list'].map((s) => {
+          return html`<mwc-list-item .value=${s}>${capitalize(s)}</mwc-list-item>`;
+        })}
+      </mwc-select>
       <mwc-formfield .label=${`Only Allow Display of Schedules`}>
         <mwc-switch
           .checked=${this._display_only !== false}
@@ -128,10 +150,21 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
           @change=${this._valueChanged}
         ></mwc-switch>
       </mwc-formfield>
+      <br />
+      <p>Default View Options</p>
       <mwc-formfield .label=${`Show Assignment Count Badges`}>
         <mwc-switch
-          .checked=${this._show_badges !== false}
+          .checked=${this._show_badges !== false && this._view_type == 'default'}
+          .disabled=${this._view_type != 'default'}
           .configValue=${'show_badges'}
+          @change=${this._valueChanged}
+        ></mwc-switch>
+      </mwc-formfield>
+      <mwc-formfield .label=${`Show Schedule IDs`}>
+        <mwc-switch
+          .checked=${this._show_schedule_id !== false && this._view_type == 'default'}
+          .disabled=${this._view_type != 'default'}
+          .configValue=${'show_schedule_id'}
           @change=${this._valueChanged}
         ></mwc-switch>
       </mwc-formfield>

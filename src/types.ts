@@ -12,8 +12,10 @@ export interface WiserScheduleCardConfig extends LovelaceCardConfig {
   name?: string;
   theme_colors: boolean;
   show_badges: boolean;
+  show_schedule_id: boolean;
   display_only: boolean;
   admin_only: boolean;
+  view_type: string;
   hub: string;
   selected_schedule?: string;
 }

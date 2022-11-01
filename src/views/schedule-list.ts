@@ -10,6 +10,7 @@ import { fetchSchedules, fetchScheduleTypes } from '../data/websockets';
 import { allow_edit, PrettyPrintIcon } from '../helpers';
 import { ScheduleIcons } from '../const';
 import { SubscribeMixin } from '../components/subscribe-mixin';
+import { localize } from '../localize/localize';
 
 @customElement('wiser-schedule-list-card')
 export class ScheduleListCard extends SubscribeMixin(LitElement) {
@@ -92,7 +93,7 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
             <div class="name">${this.config.name}</div>
           </div>
           <div class="card-content">
-            <div class="info-text">Select a schedule to view</div>
+            <div class="info-text">${localize('wiser.helpers.select_a_schedule')}</div>
             ${this.supported_schedule_types!.map((schedule_type) => this.renderScheduleItemsByType(schedule_type))}
           </div>
           ${this.renderAddScheduleButton()}
@@ -104,7 +105,7 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
           <div class="card-header">
             <div class="name">${this.config.name}</div>
           </div>
-          <div class="card-content">${this._showWarning('No schedules found')}</div>
+          <div class="card-content">${this._showWarning(localize('wiser.common.no_schedules'))}</div>
         </ha-card>
       `;
     }
@@ -121,9 +122,38 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
         <div class="sub-heading">
           <fieldset>
             <legend>${schedule_type}</legend>
-            <div class="wrapper">${filtered_schedule_list.map((schedule) => this.renderScheduleItem(schedule))}</div>
+            <div class="wrapper">
+              ${this.config?.view_type == 'list'
+                ? this.renderScheduleList(filtered_schedule_list)
+                : this.config?.show_schedule_id
+                ? filtered_schedule_list
+                    .sort((a, b) => a.Id - b.Id)
+                    .map((schedule) => this.renderScheduleItem(schedule))
+                : filtered_schedule_list.map((schedule) => this.renderScheduleItem(schedule))}
+            </div>
           </fieldset>
         </div>
+      `;
+    }
+    return html``;
+  }
+
+  renderScheduleList(schedule_list): TemplateResult {
+    if (schedule_list.length > 0) {
+      return html`
+        <table class="schedule-table">
+          <thead>
+            <tr class="table-header">
+              <td class="schedule-id" style="text-align: center;">ID</td>
+              <td class="schedule-name">${localize('wiser.labels.name')}</td>
+              <td class="schedule-assigns">${localize('wiser.labels.assigns')}</td>
+              <td class="schedule-action">&nbsp;</td>
+            </tr>
+          </thead>
+          <tbody class="table-body">
+            ${schedule_list.sort((a, b) => a.Id - b.Id).map((schedule) => this.renderScheduleListItem(schedule))}
+          </tbody>
+        </table>
       `;
     }
     return html``;
@@ -138,9 +168,28 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
         @click=${() => this._scheduleClick(schedule.Type, schedule.Id)}
       >
         <ha-icon .icon="${PrettyPrintIcon(icon)}"></ha-icon>
-        <span class="button-label">${schedule.Name}</span>
+        <span class="button-label">${this.config?.show_schedule_id ? schedule.Id + ' - ' : null}${schedule.Name}</span>
         ${this.config?.show_badges ? html`<span class="badge">${schedule.Assignments}</span>` : null}
       </div>
+    `;
+  }
+
+  renderScheduleListItem(schedule: ScheduleListItem): TemplateResult | void {
+    return html`
+      <tr class="table-body-item">
+        <td class="schedule-id">${schedule.Id}</td>
+        <td class="schedule-name">${schedule.Name}</td>
+        <td class="schedule-assigns">${schedule.Assignments}</td>
+        <td class="schedule-action">
+          <div
+            class="view-button"
+            id=${'schedule' + schedule.Id}
+            @click=${() => this._scheduleClick(schedule.Type, schedule.Id)}
+          >
+            <span class="button-label">${localize('wiser.actions.view')}</span>
+          </div>
+        </td>
+      </tr>
     `;
   }
 
@@ -148,7 +197,7 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
     if (allow_edit(this.hass!, this.config!)) {
       return html`
         <div class="card-actions">
-          <mwc-button @click=${this._addScheduleClick}>Add Schedule </mwc-button>
+          <mwc-button @click=${this._addScheduleClick}>${localize('wiser.actions.add_schedule')} </mwc-button>
         </div>
       `;
     }
@@ -197,6 +246,55 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
     div.schedule-item ha-icon {
       float: left;
       cursor: pointer;
+    }
+    .schedule-id {
+      width: 30px;
+      text-align: right;
+    }
+    .schedule-name {
+      padding-left: 5px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .schedule-assigns {
+      width: 15%;
+      text-align: center;
+      padding-left: 5px;
+    }
+    .schedule-action {
+      width: 75px;
+      text-align: center;
+      padding-left: 5px;
+    }
+
+    div.table-header {
+      display: flex;
+      font-weight: 500;
+    }
+    div.table-body-item {
+      display: flex;
+      align-items: center;
+    }
+    .schedule-table {
+      width: 100%;
+      font-size: 14px;
+      table-layout: fixed;
+    }
+    .view-button {
+      line-height: 32px;
+      cursor: pointer;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      margin: 3px 10px 3px 5px;
+      display: flex;
+      padding: 0px 15px 0px 10px;
+      color: var(--mdc-theme-primary, #6200ee);
+      background: var(--primary-color);
+      --mdc-theme-primary: var(--text-primary-color);
+      border-radius: 4px;
+      font-size: var(--material-button-font-size);
+      position: relative;
     }
     .schedule-item {
       line-height: 32px;
