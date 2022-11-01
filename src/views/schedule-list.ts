@@ -312,16 +312,19 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
       position: relative;
     }
     .badge {
-      font-size: small;
+      font-size: 13px;
+      font-weight: 400;
       position: absolute;
+      min-width: 20px;
+      box-sizing: border-box;
       top: -5px;
       right: -8px;
-      background-color: var(--label-badge-red);
-      width: 20px;
-      height: 20px;
+      background-color: var(--accent-color);
       border-radius: 50%;
       line-height: 20px;
       text-align: center;
+      padding: 0px 6px;
+      color: var(--text-accent-color, var(--text-primary-color));
     }
   `;
 }
