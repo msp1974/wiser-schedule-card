@@ -138,7 +138,7 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
     return html``;
   }
 
-  renderScheduleList(schedule_list): TemplateResult {
+  renderScheduleList(schedule_list: ScheduleListItem[]): TemplateResult {
     if (schedule_list.length > 0) {
       return html`
         <table class="schedule-table">
