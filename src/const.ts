@@ -41,7 +41,6 @@ export const SPECIAL_DAYS: string[] = ['Weekdays', 'Weekend'];
 export const weekdays: string[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 export const weekends: string[] = ['Saturday', 'Sunday'];
 export const days: string[] = weekdays.concat(weekends);
-export const days_short: string[] = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 export const SPECIAL_TIMES = ['Sunrise', 'Sunset'];
 export enum SPECIAL_TIMES_MAPPING {
   Sunrise = '3000',

@@ -13,7 +13,6 @@ import {
   SEC_PER_DAY,
   day_short_width,
   days,
-  days_short,
   DefaultSetpoint,
   SetpointUnits,
   SPECIAL_TIMES,
