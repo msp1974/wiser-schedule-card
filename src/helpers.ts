@@ -70,11 +70,11 @@ export function color_map(element: LitElement, schedule_type: string, setPoint: 
     if (parseFloat(setPoint) == -20) {
       return '138, 138, 138';
     }
-    const maxc = 25;
-    const minc = 5;
+    const maxc = 45;
+    const minc = -10;
     const f = (parseFloat(setPoint) - minc) / (maxc - minc);
     const Y = Math.floor(255 * (1 - f));
-    const r = 255;
+    const r = 220;
     const g = Y;
     const b = 0;
     return r + ',' + g + ',' + b + ',1';
