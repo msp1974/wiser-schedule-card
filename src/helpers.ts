@@ -48,7 +48,7 @@ export function getGreyToYellow(percent: number): string {
   if (percent == 0) {
     return '50,50,50';
   }
-  const r_max = 250;
+  const r_max = 235;
   const g_max = 200;
   const min = 50;
   const r = int(min + ((r_max - min) / 100) * percent);
@@ -74,7 +74,7 @@ export function color_map(element: LitElement, schedule_type: string, setPoint: 
     const minc = -10;
     const f = (parseFloat(setPoint) - minc) / (maxc - minc);
     const Y = Math.floor(255 * (1 - f));
-    const r = 220;
+    const r = 235;
     const g = Y;
     const b = 0;
     return r + ',' + g + ',' + b + ',1';
