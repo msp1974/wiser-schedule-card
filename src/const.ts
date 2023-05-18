@@ -1,4 +1,4 @@
-export const CARD_VERSION = '1.2.0';
+export const CARD_VERSION = '1.3.0';
 export const DOMAIN = 'wiser';
 export const DefaultTimeStep = 10;
 export const DefaultActionIcon = 'flash';

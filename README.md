@@ -6,10 +6,6 @@ A Home Assistant Lovelace custom card to manage schedules for the Wiser Home Ass
 [![License][license-shield]](LICENSE.md)
 [![hacs_badge](https://img.shields.io/badge/HACS-Default-orange.svg?style=for-the-badge)](https://github.com/custom-components/hacs)
 
-![Project Maintenance][maintenance-shield]
-[![GitHub Activity][commits-shield]][commits]
-
-[![Community Forum][forum-shield]][forum]
 
 ## How to Use
 
