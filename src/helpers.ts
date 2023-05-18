@@ -1,5 +1,5 @@
 import { Schedule, ScheduleDay, WiserScheduleCardConfig } from './types';
-import { FrontendTranslationData, HomeAssistant, NumberFormat } from 'custom-card-helpers';
+import { FrontendLocaleData, HomeAssistant, NumberFormat, TimeFormat } from 'custom-card-helpers';
 
 import hexRgb from 'hex-rgb';
 import { LitElement } from 'lit';
@@ -57,12 +57,13 @@ export function getGreyToYellow(percent: number): string {
 }
 
 export function color_map(element: LitElement, schedule_type: string, setPoint: string): string {
+  console.log(setPoint + ' - ' + schedule_type);
   if (setPoint == 'Unknown') return '100,100,100';
   if (schedule_type.toLowerCase() === 'onoff') {
     if (setPoint == 'On') {
-      return hexToRgbString(getCSSVariable(element, '--state-on-color'));
+      return hexToRgbString(getCSSVariable(element, '--green-color'));
     }
-    return hexToRgbString(getCSSVariable(element, '--state-off-color'));
+    return hexToRgbString(getCSSVariable(element, '--red-color'));
   } else if (['lighting', 'shutters'].includes(schedule_type.toLowerCase())) {
     return getGreyToYellow(parseInt(setPoint)) + ',1';
   } else {
@@ -78,7 +79,6 @@ export function color_map(element: LitElement, schedule_type: string, setPoint: 
     const b = 0;
     return r + ',' + g + ',' + b + ',1';
   }
-  return '100, 100, 100';
 }
 
 export function allow_edit(hass: HomeAssistant, config: WiserScheduleCardConfig): boolean {
@@ -125,8 +125,9 @@ export function stringTimeToSeconds(t: string): number {
   return +hours * SEC_PER_HOUR + +mins * 60;
 }
 
-export const getLocale = (hass: HomeAssistant): FrontendTranslationData =>
+export const getLocale = (hass: HomeAssistant): FrontendLocaleData =>
   hass.locale || {
-    language: hass.language,
+    language: hass.selectedLanguage,
     number_format: NumberFormat.system,
+    time_format: TimeFormat.system,
   };

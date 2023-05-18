@@ -1,31 +1,25 @@
-import nodeResolve from 'rollup-plugin-node-resolve';
-import typescript from 'rollup-plugin-typescript2';
-import babel from 'rollup-plugin-babel';
+import nodeResolve from '@rollup/plugin-node-resolve';
+import typescript from '@rollup/plugin-typescript';
+import babel from '@rollup/plugin-babel';
 import json from '@rollup/plugin-json';
-import { terser } from 'rollup-plugin-terser';
-import commonjs from 'rollup-plugin-commonjs';
-import { visualizer } from 'rollup-plugin-visualizer';
+import terser from '@rollup/plugin-terser';
 import ignore from './rollup-plugins/ignore';
 import { ignoreTextfieldFiles } from './elements/ignore/textfield';
 import { ignoreSelectFiles } from './elements/ignore/select';
 import { ignoreSwitchFiles } from './elements/ignore/switch';
 
-
 const plugins = [
-    nodeResolve(),
-    commonjs({
-        include: 'node_modules/**',
-    }),
-    typescript(),
-    json(),
-    babel({
-        exclude: 'node_modules/**',
-    }),
-    visualizer(),
-    terser(),
-    ignore({
-        files: [...ignoreTextfieldFiles, ...ignoreSelectFiles, ...ignoreSwitchFiles].map((file) => require.resolve(file)),
-        }),
+  nodeResolve(),
+  typescript(),
+  json(),
+  babel({
+    exclude: 'node_modules/**',
+    babelHelpers: 'bundled',
+  }),
+  terser(),
+  ignore({
+    files: [...ignoreTextfieldFiles, ...ignoreSelectFiles, ...ignoreSwitchFiles].map((file) => require.resolve(file)),
+  }),
 ];
 
 export default [
@@ -34,9 +28,10 @@ export default [
     output: {
       dir: 'dist',
       format: 'iife',
+      name: 'wiserschedulecard',
       sourcemap: false,
     },
     plugins: [...plugins],
-        context: 'window',
+    context: 'window',
   },
 ];

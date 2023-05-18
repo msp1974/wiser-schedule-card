@@ -88,26 +88,14 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
     if (!this.hass || !this.config) return html``;
     if (this.schedule_list && this.schedule_list.length > 0) {
       return html`
-        <ha-card>
-          <div class="card-header">
-            <div class="name">${this.config.name}</div>
-          </div>
-          <div class="card-content">
-            <div class="info-text">${localize('wiser.helpers.select_a_schedule')}</div>
-            ${this.supported_schedule_types!.map((schedule_type) => this.renderScheduleItemsByType(schedule_type))}
-          </div>
-          ${this.renderAddScheduleButton()}
-        </ha-card>
+        <div>
+          <div class="info-text">${localize('wiser.helpers.select_a_schedule')}</div>
+          ${this.supported_schedule_types!.map((schedule_type) => this.renderScheduleItemsByType(schedule_type))}
+        </div>
+        ${this.renderAddScheduleButton()}
       `;
     } else {
-      return html`
-        <ha-card>
-          <div class="card-header">
-            <div class="name">${this.config.name}</div>
-          </div>
-          <div class="card-content">${this._showWarning(localize('wiser.common.no_schedules'))}</div>
-        </ha-card>
-      `;
+      return html` ${this._showWarning(localize('wiser.common.no_schedules'))} `;
     }
   }
 

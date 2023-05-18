@@ -4,7 +4,7 @@ import { HomeAssistant, fireEvent, LovelaceCardEditor } from 'custom-card-helper
 
 import { ScopedRegistryHost } from '@lit-labs/scoped-registry-mixin';
 import { WiserScheduleCardConfig, ScheduleListItem } from './types';
-import { customElement, property, state } from 'lit/decorators';
+import { customElement, property, state } from 'lit/decorators.js';
 import { formfieldDefinition } from '../elements/formfield';
 import { selectDefinition } from '../elements/select';
 import { switchDefinition } from '../elements/switch';
@@ -79,6 +79,10 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
     return this._config?.view_type || 'default';
   }
 
+  get _hide_card_borders(): boolean {
+    return this._config?.hide_card_borders || false;
+  }
+
   async loadData(): Promise<void> {
     if (this.hass) {
       this._hubs = await fetchHubs(this.hass);
@@ -147,6 +151,13 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
         <mwc-switch
           .checked=${this._theme_colors !== false}
           .configValue=${'theme_colors'}
+          @change=${this._valueChanged}
+        ></mwc-switch>
+      </mwc-formfield>
+      <mwc-formfield .label=${`Hide Card Borders (for stack-in cards)`}>
+        <mwc-switch
+          .checked=${this._hide_card_borders !== false}
+          .configValue=${'hide_card_borders'}
           @change=${this._valueChanged}
         ></mwc-switch>
       </mwc-formfield>

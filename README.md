@@ -12,8 +12,8 @@ A Home Assistant Lovelace custom card to manage schedules for the Wiser Home Ass
 [![Community Forum][forum-shield]][forum]
 
 ## How to Use
-WRITE SOME INSTRUCTIONS!!
 
+WRITE SOME INSTRUCTIONS!!
 
 [commits-shield]: https://img.shields.io/github/commit-activity/y/msp1974/wiser-schedule-card.svg?style=for-the-badge
 [commits]: https://github.com/msp1974/wiser-schedule-card/commits/master

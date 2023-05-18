@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { LitElement, html, css, TemplateResult, CSSResultGroup } from 'lit';
-import { createRef, Ref } from 'lit/directives/ref';
 import { property, customElement, state, eventOptions } from 'lit/decorators.js';
 import { HomeAssistant } from 'custom-card-helpers';
 import { mdiRadiatorOff, mdiUnfoldMoreVertical } from '@mdi/js';
@@ -50,7 +49,6 @@ export class ScheduleSlotEditor extends LitElement {
   timer = 0;
   timeout = 0;
   zoomFactor = 1;
-  switchRef: Ref<HTMLElement> = createRef();
 
   @state() rangeMin = 0; //lower bound of zoomed timeframe
 

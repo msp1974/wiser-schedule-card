@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { LitElement, html, TemplateResult, PropertyValues } from 'lit';
-import { customElement, property, state } from 'lit/decorators';
+import { customElement, property, state } from 'lit/decorators.js';
 import { HomeAssistant, LovelaceCardEditor, getLovelace, hasConfigOrEntityChanged } from 'custom-card-helpers'; // This is a community maintained npm module with common helper functions/types. https://github.com/custom-cards/custom-card-helpers
 
 import type { WiserScheduleCardConfig } from './types';
@@ -120,10 +120,10 @@ export class WiserScheduleCard extends LitElement {
     if (changedProps.has('_view')) {
       return true;
     }
+
     if (changedProps.has('_schedule_list')) {
       return true;
     }
-
     return hasConfigOrEntityChanged(this, changedProps, false);
   }
 
@@ -136,60 +136,96 @@ export class WiserScheduleCard extends LitElement {
 
   protected render(): TemplateResult | void {
     if (!this._hass || !this.config || !this.translationsLoaded) return html``;
+    const border_style = this.config.hide_card_borders ? 'border-width: 0px' : '';
     if (this._view == EViews.Overview) {
       return html`
-        <wiser-schedule-list-card
-          id="schedule_list"
-          .hass=${this._hass}
-          .config=${this.config}
-          @scheduleClick=${this._scheduleClick}
-          @addScheduleClick=${this._addScheduleClick}
-        ></wiser-schedule-list-card>
+        <ha-card style=${border_style}>
+          <div class="card-header">
+            <div class="name">${this.config.name}</div>
+          </div>
+          <div class="card-content">
+            <wiser-schedule-list-card
+              id="schedule_list"
+              .hass=${this._hass}
+              .config=${this.config}
+              @scheduleClick=${this._scheduleClick}
+              @addScheduleClick=${this._addScheduleClick}
+            ></wiser-schedule-list-card>
+          </div>
+        </ha-card>
       `;
     } else if (this._view == EViews.ScheduleEdit && this._schedule_id) {
       return html`
-        <wiser-schedule-edit-card
-          .hass=${this._hass}
-          .config=${this.config}
-          .schedule_id=${this._schedule_id}
-          .schedule_type=${this._schedule_type}
-          @backClick=${this._backClick}
-          @renameClick=${this._renameClick}
-          @editClick=${this._editClick}
-          @copyClick=${this._copyClick}
-          @scheduleDeleted=${this._scheduleDeleted}
-        ></wiser-schedule-edit-card>
+        <ha-card style=${border_style}>
+          <div class="card-header">
+            <div class="name">${this.config.name}</div>
+          </div>
+          <div class="card-content">
+            <wiser-schedule-edit-card
+              .hass=${this._hass}
+              .config=${this.config}
+              .schedule_id=${this._schedule_id}
+              .schedule_type=${this._schedule_type}
+              @backClick=${this._backClick}
+              @renameClick=${this._renameClick}
+              @editClick=${this._editClick}
+              @copyClick=${this._copyClick}
+              @scheduleDeleted=${this._scheduleDeleted}
+            ></wiser-schedule-edit-card>
+          </div>
+        </ha-card>
       `;
     } else if (this._view == EViews.ScheduleAdd) {
       return html`
-        <wiser-schedule-add-card
-          .hass=${this._hass}
-          .config=${this.config}
-          @backClick=${this._backClick}
-          @scheduleAdded=${this._scheduleAdded}
-        ></wiser-schedule-add-card>
+        <ha-card style=${border_style}>
+          <div class="card-header">
+            <div class="name">${this.config.name}</div>
+          </div>
+          <div class="card-content">
+            <wiser-schedule-add-card
+              .hass=${this._hass}
+              .config=${this.config}
+              @backClick=${this._backClick}
+              @scheduleAdded=${this._scheduleAdded}
+            ></wiser-schedule-add-card>
+          </div>
+        </ha-card>
       `;
     } else if (this._view == EViews.ScheduleCopy) {
       return html`
-        <wiser-schedule-copy-card
-          .hass=${this._hass}
-          .config=${this.config}
-          .schedule_id=${this._schedule_id}
-          .schedule_type=${this._schedule_type}
-          @backClick=${this._backClick}
-          @scheduleCopied=${this._scheduleCopied}
-        ></wiser-schedule-copy-card>
+        <ha-card style=${border_style}>
+          <div class="card-header">
+            <div class="name">${this.config.name}</div>
+          </div>
+          <div class="card-content">
+            <wiser-schedule-copy-card
+              .hass=${this._hass}
+              .config=${this.config}
+              .schedule_id=${this._schedule_id}
+              .schedule_type=${this._schedule_type}
+              @backClick=${this._backClick}
+              @scheduleCopied=${this._scheduleCopied}
+            ></wiser-schedule-copy-card>
+          </div>
+        </ha-card>
       `;
     } else if (this._view == EViews.ScheduleRename) {
       return html`
-        <wiser-schedule-rename-card
-          .hass=${this._hass}
-          .config=${this.config}
-          .schedule_id=${this._schedule_id}
-          .schedule_type=${this._schedule_type}
-          @backClick=${this._backClick}
-          @scheduleRenamed=${this._scheduleRenamed}
-        ></wiser-schedule-rename-card>
+        <ha-card style=${border_style}>
+          <div class="card-header">
+            <div class="name">${this.config.name}</div>
+          </div>
+          <div class="card-content">
+            <wiser-schedule-rename-card
+              .hass=${this._hass}
+              .config=${this.config}
+              .schedule_id=${this._schedule_id}
+              .schedule_type=${this._schedule_type}
+              @backClick=${this._backClick}
+              @scheduleRenamed=${this._scheduleRenamed}
+            ></wiser-schedule-rename-card>
+          </div>
+        </ha-card>
       `;
     }
     return html``;

@@ -196,22 +196,11 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
   protected render(): TemplateResult {
     if (!this.hass || !this.config || !this.component_loaded) return html``;
     if (isDefined(this.error)) {
-      return html` <ha-card>
-        <div class="card-header">
-          <div class="name">${this.config!.name}</div>
-        </div>
-        <div class="card-content">
-          <hui-warning> ${this.error.message} </hui-warning>
-        </div>
-      </ha-card>`;
+      return html` <hui-warning> ${this.error.message} </hui-warning> `;
     }
     if (this.schedule && this.entities && this.suntimes) {
       return html`
-        <ha-card>
-          <div class="card-header">
-            <div class="name">${this.config!.name}</div>
-          </div>
-          <div class="card-content">
+          <div>
             <div class="schedule-info">
               <span class="sub-heading">${localize('wiser.headings.schedule_type')}: </span> ${this.schedule.SubType}
             </div>
@@ -244,12 +233,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
         </ha-card>
       `;
     }
-    return html` <ha-card>
-      <div class="card-header">
-        <div class="name">${this.config!.name}</div>
-      </div>
-      <div class="card-content"></div>
-    </ha-card>`;
+    return html``;
   }
 
   renderScheduleAssignment(

@@ -49,11 +49,7 @@ export class ScheduleCopyCard extends LitElement {
   render(): TemplateResult {
     if (!this.hass || !this.config || !this.schedule) return html``;
     return html`
-      <ha-card>
-        <div class="card-header">
-          <div class="name">${this.config!.name}</div>
-        </div>
-        <div class="card-content">
+       <div>
           <div>${localize('wiser.headings.copy_schedule')}</div>
           <div class="schedule-info">
             <span class="sub-heading">${localize('wiser.headings.schedule_type')}:</span> ${this.schedule.Type}
@@ -112,6 +108,11 @@ export class ScheduleCopyCard extends LitElement {
         white-space: nowrap;
         transition: width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67), margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
         overflow: auto;
+      }
+      div.card-actions {
+        border-top: 1px solid var(--divider-color, #e8e8e8);
+        padding: 5px 0px;
+        min-height: 40px;
       }
       div.wrapper {
         color: var(--primary-text-color);

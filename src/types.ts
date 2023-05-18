@@ -18,6 +18,7 @@ export interface WiserScheduleCardConfig extends LovelaceCardConfig {
   view_type: string;
   hub: string;
   selected_schedule?: string;
+  hide_card_borders: boolean;
 }
 
 interface SunTime {

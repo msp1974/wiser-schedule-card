@@ -45,37 +45,32 @@ export class ScheduleAddCard extends LitElement {
   render(): TemplateResult {
     if (!this.hass || !this.config) return html``;
     return html`
-      <ha-card>
-        <div class="card-header">
-          <div class="name">${this.config!.name}</div>
-        </div>
-        <div class="card-content">
-          <div>${localize('wiser.actions.add_schedule')}</div>
-          <div class="wrapper" style="white-space: normal">${localize('wiser.helpers.add_schedule')}</div>
-          <div class="wrapper">${this._schedule_types.map((t, i) => this.renderScheduleTypeButtons(t, i))}</div>
-          <ha-textfield
-            class="schedule-name"
-            auto-validate
-            required
-            label=${localize('wiser.headings.schedule_name')}
-            error-message=${localize('wiser.common.name_required')}
-            .configValue=${'Name'}
-            @input=${this._valueChanged}
-          >
-          </ha-textfield>
-        </div>
-        <div class="card-actions">
-          <mwc-button
-            style="float: right"
-            .disabled=${this._schedule_info && this._schedule_info.Name ? false : true}
-            @click=${this.confirmClick}
-            dialogAction="close"
-          >
-            ${this.hass.localize('ui.common.save')}
-          </mwc-button>
-          <mwc-button @click=${this.cancelClick}> ${this.hass.localize('ui.common.cancel')} </mwc-button>
-        </div>
-      </ha-card>
+      <div>
+        <div>${localize('wiser.actions.add_schedule')}</div>
+        <div class="wrapper" style="white-space: normal">${localize('wiser.helpers.add_schedule')}</div>
+        <div class="wrapper">${this._schedule_types.map((t, i) => this.renderScheduleTypeButtons(t, i))}</div>
+        <ha-textfield
+          class="schedule-name"
+          auto-validate
+          required
+          label=${localize('wiser.headings.schedule_name')}
+          error-message=${localize('wiser.common.name_required')}
+          .configValue=${'Name'}
+          @input=${this._valueChanged}
+        >
+        </ha-textfield>
+      </div>
+      <div class="card-actions">
+        <mwc-button
+          style="float: right"
+          .disabled=${this._schedule_info && this._schedule_info.Name ? false : true}
+          @click=${this.confirmClick}
+          dialogAction="close"
+        >
+          ${this.hass.localize('ui.common.save')}
+        </mwc-button>
+        <mwc-button @click=${this.cancelClick}> ${this.hass.localize('ui.common.cancel')} </mwc-button>
+      </div>
     `;
   }
 

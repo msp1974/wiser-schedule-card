@@ -1,17 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { FrontendTranslationData } from 'custom-card-helpers';
+import { FrontendLocaleData, TimeFormat } from 'custom-card-helpers';
 import { format } from 'fecha';
-
-export enum TimeFormat {
-  language = 'language',
-  system = 'system',
-  am_pm = '12',
-  twenty_four = '24',
-}
-
-export interface FrontendLocaleData extends FrontendTranslationData {
-  time_format?: TimeFormat;
-}
 
 export const formatAmPm = (locale: FrontendLocaleData): boolean => {
   if (locale.time_format === TimeFormat.language || locale.time_format === TimeFormat.system) {
