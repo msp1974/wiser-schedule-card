@@ -76,7 +76,10 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
   }
 
   get _view_type(): string {
-    return this._config?.view_type || 'default';
+    if (this._config?.view_type) {
+      return this._config?.view_type;
+    }
+    return 'default';
   }
 
   get _hide_card_borders(): boolean {
@@ -126,7 +129,6 @@ export class WiserScheduleCardEditor extends ScopedRegistryHost(LitElement) impl
         @selected=${this._valueChanged}
         @closed=${(ev) => ev.stopPropagation()}
       >
-        <mwc-list-item></mwc-list-item>
         ${['default', 'list'].map((s) => {
           return html`<mwc-list-item .value=${s}>${capitalize(s)}</mwc-list-item>`;
         })}
