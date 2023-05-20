@@ -139,10 +139,7 @@ export class WiserScheduleCard extends LitElement {
     const border_style = this.config.hide_card_borders ? 'border-width: 0px' : '';
     if (this._view == EViews.Overview) {
       return html`
-        <ha-card style=${border_style}>
-          <div class="card-header">
-            <div class="name">${this.config.name}</div>
-          </div>
+        <ha-card style=${border_style} .header=${this.config.name}>
           <div class="card-content">
             <wiser-schedule-list-card
               id="schedule_list"
@@ -156,10 +153,7 @@ export class WiserScheduleCard extends LitElement {
       `;
     } else if (this._view == EViews.ScheduleEdit && this._schedule_id) {
       return html`
-        <ha-card style=${border_style}>
-          <div class="card-header">
-            <div class="name">${this.config.name}</div>
-          </div>
+        <ha-card style=${border_style} .header=${this.config.name}>
           <div class="card-content">
             <wiser-schedule-edit-card
               .hass=${this._hass}
@@ -177,10 +171,7 @@ export class WiserScheduleCard extends LitElement {
       `;
     } else if (this._view == EViews.ScheduleAdd) {
       return html`
-        <ha-card style=${border_style}>
-          <div class="card-header">
-            <div class="name">${this.config.name}</div>
-          </div>
+        <ha-card style=${border_style} .header=${this.config.name}>
           <div class="card-content">
             <wiser-schedule-add-card
               .hass=${this._hass}
@@ -193,10 +184,7 @@ export class WiserScheduleCard extends LitElement {
       `;
     } else if (this._view == EViews.ScheduleCopy) {
       return html`
-        <ha-card style=${border_style}>
-          <div class="card-header">
-            <div class="name">${this.config.name}</div>
-          </div>
+        <ha-card style=${border_style} .header=${this.config.name}>
           <div class="card-content">
             <wiser-schedule-copy-card
               .hass=${this._hass}
@@ -211,10 +199,7 @@ export class WiserScheduleCard extends LitElement {
       `;
     } else if (this._view == EViews.ScheduleRename) {
       return html`
-        <ha-card style=${border_style}>
-          <div class="card-header">
-            <div class="name">${this.config.name}</div>
-          </div>
+        <ha-card style=${border_style} .header=${this.config.name}>
           <div class="card-content">
             <wiser-schedule-rename-card
               .hass=${this._hass}
