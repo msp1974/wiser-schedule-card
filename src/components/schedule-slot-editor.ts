@@ -228,15 +228,18 @@ export class ScheduleSlotEditor extends LitElement {
       : null;
     return html`
       <div class="wrapper special-times" style="white-space: normal;">
-        <div class="sub-heading">Set Special Time</div>
-        <mwc-button id=${'sunrise'} @click=${this._setSpecialTime} ?disabled=${!slot}>
-          <ha-icon id=${'sunrise'} icon="hass:weather-sunny" class="padded-right"></ha-icon>
-          Sunrise
-        </mwc-button>
-        <mwc-button id=${'sunset'} @click=${this._setSpecialTime} ?disabled=${!slot}>
-          <ha-icon id=${'sunset'} icon="hass:weather-night" class="padded-right"></ha-icon>
-          Sunset
-        </mwc-button>
+        <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
+        <div class="sub-section">
+          <div class="sub-heading">Set Special Time</div>
+          <mwc-button id=${'sunrise'} @click=${this._setSpecialTime} ?disabled=${!slot}>
+            <ha-icon id=${'sunrise'} icon="hass:weather-sunny" class="padded-right"></ha-icon>
+            Sunrise
+          </mwc-button>
+          <mwc-button id=${'sunset'} @click=${this._setSpecialTime} ?disabled=${!slot}>
+            <ha-icon id=${'sunset'} icon="hass:weather-night" class="padded-right"></ha-icon>
+            Sunset
+          </mwc-button>
+        </div>
       </div>
     `;
   }
@@ -312,24 +315,22 @@ export class ScheduleSlotEditor extends LitElement {
           <div class="wrapper" style="height: 36px;">
             <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
             <div class="sub-section">
-              <div class="section-header">State</div>
-              <div>
-                <mwc-button
-                  id="state-off"
-                  class="state-button active"
-                  .disabled=${this._activeSlot < 0 || slots[this._activeSlot!].Setpoint == 'Off' ? true : false}
-                  @click=${() => this._updateSetPoint('Off')}
-                >
-                  Off
-                </mwc-button>
-                <mwc-button
-                  id="state-on"
-                  class="state-button active"
-                  .disabled=${this._activeSlot < 0 || slots[this._activeSlot!].Setpoint == 'On' ? true : false}
-                  @click=${() => this._updateSetPoint('On')}
-                >
-                  On
-                </mwc-button>
+              <div style="display: flex; justify-content: center;">
+                <div class="section-header" style="padding-right: 30%">State</div>
+                <div style="display: flex; line-height: 32px;">
+                  <span>Off</span>
+                  <ha-switch
+                    style="margin: 8px 10px;"
+                    ?checked=${this._activeSlot >= 0 && slots[this._activeSlot!].Setpoint == 'On'}
+                    .disabled=${this._activeSlot < 0}
+                    @change=${() =>
+                      slots[this._activeSlot!].Setpoint == 'On'
+                        ? this._updateSetPoint('Off')
+                        : this._updateSetPoint('On')}
+                  >
+                  </ha-switch>
+                  <span>On</span>
+                </div>
               </div>
             </div>
           </div>
@@ -410,7 +411,7 @@ export class ScheduleSlotEditor extends LitElement {
                 <ha-icon
                   icon="hass:${slots![i].SpecialTime == SPECIAL_TIMES[0] ? 'weather-sunny' : 'weather-night'}"
                 ></ha-icon>
-                ${formatTime(stringToDate(timeToString(stringToTime(slots![i].SpecialTime))), getLocale(this.hass!))}
+                ${slots![i].SpecialTime}
               `
             : formatTime(stringToDate(timeToString(stringToTime(slots![i].Time))), getLocale(this.hass!))}
         </div>
@@ -583,7 +584,6 @@ export class ScheduleSlotEditor extends LitElement {
         ];
       }
       this._activeSlot++;
-      console.log(this.schedule);
     }
 
     const myEvent = new CustomEvent('scheduleChanged', {
@@ -1021,12 +1021,6 @@ export class ScheduleSlotEditor extends LitElement {
         margin: 0 2px;
         max-width: 100px;
       }
-      mwc-button#state-on {
-        background-color: var(--state-on-color);
-      }
-      mwc-button#state-off {
-        background-color: var(--state-off-color);
-      }
 
       mwc-button.warning {
         --mdc-theme-primary: var(--error-color);
@@ -1063,7 +1057,7 @@ export class ScheduleSlotEditor extends LitElement {
         margin-left: 0px;
       }
       .sub-heading {
-        padding-bottom: 10px;
+        padding: 0px 10px 0px 10px;
         font-weight: 500;
       }
     `;
