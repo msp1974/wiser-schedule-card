@@ -57,7 +57,6 @@ export function getGreyToYellow(percent: number): string {
 }
 
 export function color_map(element: LitElement, schedule_type: string, setPoint: string): string {
-  console.log(setPoint + ' - ' + schedule_type);
   if (setPoint == 'Unknown') return '100,100,100';
   if (schedule_type.toLowerCase() === 'onoff') {
     if (setPoint == 'On') {
