@@ -282,12 +282,18 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 
   renderEntityButton(entity: Entities, active: boolean): TemplateResult | void {
     return html`
-      <mwc-button id=${entity.Id} class=${active ? 'active' : ''} @click=${this.entityAssignmentClick}>
+      <ha-button 
+        id=${entity.Id}
+        class=${active ? 'active' : ''}
+        appearance=${active ? 'accent' : 'plain'} 
+        size="small"
+        @click=${this.entityAssignmentClick}
+      >
         ${this._assigning_in_progress == entity.Id
           ? html`<span class="waiting"><ha-circular-progress active size="small"></ha-circular-progress></span>`
           : null}
         ${entity.Name}
-      </mwc-button>
+      </ha-button>
     `;
   }
 
@@ -326,65 +332,90 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
   }
 
   renderBackButton(): TemplateResult | void {
-    return html` <mwc-button @click=${this.backClick}>${this.hass!.localize('ui.common.back')} </mwc-button> `;
+    return html`
+      <ha-button
+        appearance="plain"
+        @click=${this.backClick}>${this.hass!.localize('ui.common.back')}
+      </ha-button> `;
   }
 
   renderCancelButton(): TemplateResult | void {
-    return html` <mwc-button @click=${this.cancelClick}>${this.hass!.localize('ui.common.cancel')}</mwc-button> `;
+    return html`
+      <ha-button 
+        appearance="plain"
+        @click=${this.cancelClick}>${this.hass!.localize('ui.common.cancel')}
+      </ha-button> `;
   }
 
   renderScheduleRenameButton(): TemplateResult {
     return html`
-      <mwc-button class="large active" label=${localize('wiser.actions.rename')} @click=${this.renameScheduleClick}>
-      </mwc-button>
+      <ha-button 
+        class="schedule-action-button"
+        @click=${this.renameScheduleClick}>
+        ${localize('wiser.actions.rename')}
+      </ha-button>
     `;
   }
 
   renderDeleteScheduleButton(): TemplateResult | void {
     return html`
-      <mwc-button
-        class="large warning"
-        label=${this.hass!.localize('ui.common.delete')}
+      <ha-button
+        class="schedule-action-button"
+        variant="danger"
         .disabled=${this.schedule_id == 1000}
         @click=${this.deleteClick}
       >
-      </mwc-button>
+        ${this.hass!.localize('ui.common.delete')}
+      </ha-button>
     `;
   }
 
   renderCopyScheduleButton(): TemplateResult | void {
     return html`
-      <mwc-button
-        class="large active"
-        label=${localize('wiser.actions.copy')}
+      <ha-button
+        class="schedule-action-button"
         .disabled=${this.schedule_id == 1000}
         @click=${this.copyClick}
       >
-      </mwc-button>
+        ${localize('wiser.actions.copy')}
+      </ha-button>
     `;
   }
 
   renderEditScheduleButton(): TemplateResult | void {
     return html`
-      <mwc-button class="large active" label=${this.hass!.localize('ui.common.edit')} @click=${this.editClick}>
-      </mwc-button>
+      <ha-button 
+        class="schedule-action-button"
+        @click=${this.editClick}
+      >
+        ${this.hass!.localize('ui.common.edit')} 
+      </ha-button>
     `;
   }
 
   renderFilesScheduleButton(): TemplateResult | void {
     return html`
-      <mwc-button class="large active" label=${localize('wiser.actions.files')} @click=${this.filesClick}> </mwc-button>
+      <ha-button 
+        class="schedule-action-button"
+        @click=${this.filesClick}
+      > 
+        ${localize('wiser.actions.files')}
+      </ha-button>
     `;
   }
 
   renderSaveScheduleButton(): TemplateResult | void {
     if (allow_edit(this.hass!, this.config)) {
       return html`
-        <mwc-button class="right" @click=${this.saveClick}>
+        <ha-button
+          appearance="plain"
+          style="float: right"
+          @click=${this.saveClick}
+        >
           ${this._save_in_progress
             ? html`<ha-circular-progress active size="small"></ha-circular-progress>`
             : this.hass!.localize('ui.common.save')}
-        </mwc-button>
+        </ha-button>
       `;
     }
   }
@@ -688,21 +719,9 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
         animation: 0.2s fadeIn;
         animation-fill-mode: forwards;
       }
-      mwc-button.warning {
-        --mdc-theme-primary: #fff;
-        background-color: var(--error-color);
-        border-radius: var(--mdc-shape-small, 4px);
-      }
-      mwc-button.large {
-        width: 22.5%;
-        margin: 2px;
-        max-width: 200px;
-      }
-      mwc-button.right {
-        float: right;
-      }
-      mwc-button.warning .mdc-button .mdc-button__label {
-        color: var(--primary-text-color);
+      .schedule-action-button {
+        width: 20%;
+        padding: 0 5px;
       }
       ha-icon-button {
         --mdc-icon-button-size: 36px;
@@ -716,18 +735,6 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
         100% {
           visibility: visible;
         }
-      }
-
-      mwc-button ha-icon {
-        margin-right: 11px;
-      }
-      mwc-button.active {
-        background: var(--primary-color);
-        --mdc-theme-primary: var(--text-primary-color);
-        border-radius: 4px;
-      }
-      mwc-button {
-        margin: 2px 0;
       }
       .card-header ha-icon-button {
         position: absolute;

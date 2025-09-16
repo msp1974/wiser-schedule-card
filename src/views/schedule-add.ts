@@ -61,30 +61,32 @@ export class ScheduleAddCard extends LitElement {
         </ha-textfield>
       </div>
       <div class="card-actions">
-        <mwc-button
+        <ha-button
+          appearance="plain"
           style="float: right"
           .disabled=${this._schedule_info && this._schedule_info.Name ? false : true}
           @click=${this.confirmClick}
           dialogAction="close"
         >
           ${this.hass.localize('ui.common.save')}
-        </mwc-button>
-        <mwc-button @click=${this.cancelClick}> ${this.hass.localize('ui.common.cancel')} </mwc-button>
+        </ha-button>
+        <ha-button appearance="plain" @click=${this.cancelClick}> ${this.hass.localize('ui.common.cancel')} </ha-button>
       </div>
     `;
   }
 
   renderScheduleTypeButtons(schedule_type: string, index: number): TemplateResult {
     return html`
-      <mwc-button
+      <ha-button
         id=${index}
-        class=${this._schedule_info && this._schedule_info.Type == schedule_type ? 'active' : 'inactive'}
+        size="small"
+        appearance=${this._schedule_info && this._schedule_info.Type == schedule_type ? 'filled' : 'plain'}
         @click=${this._valueChanged}
         .configValue=${'Type'}
         .value=${schedule_type}
       >
         ${schedule_type}
-      </mwc-button>
+      </ha-button>
     `;
   }
 

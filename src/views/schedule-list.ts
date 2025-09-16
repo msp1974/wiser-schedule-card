@@ -147,18 +147,20 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
     return html``;
   }
 
+
   renderScheduleItem(schedule: ScheduleListItem): TemplateResult | void {
     const icon = ScheduleIcons[schedule.Type];
     return html`
-      <div
+      <ha-button
+        appearance="accent"
         class="schedule-item"
         id=${'schedule' + schedule.Id}
         @click=${() => this._scheduleClick(schedule.Type, schedule.Id)}
       >
-        <ha-icon .icon="${PrettyPrintIcon(icon)}"></ha-icon>
-        <span class="button-label">${this.config?.show_schedule_id ? schedule.Id + ' - ' : null}${schedule.Name}</span>
+        <ha-icon slot="start" .icon="${PrettyPrintIcon(icon)}"></ha-icon>
+        ${this.config?.show_schedule_id ? schedule.Id + ' - ' : null}${schedule.Name}
         ${this.config?.show_badges ? html`<span class="badge">${schedule.Assignments}</span>` : null}
-      </div>
+      </ha-button>
     `;
   }
 
@@ -169,13 +171,14 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
         <td class="schedule-name">${schedule.Name}</td>
         <td class="schedule-assigns">${schedule.Assignments}</td>
         <td class="schedule-action">
-          <div
-            class="view-button"
+          <ha-button
+            appearance="plain"
+            size="small"
             id=${'schedule' + schedule.Id}
             @click=${() => this._scheduleClick(schedule.Type, schedule.Id)}
           >
-            <span class="button-label">${localize('wiser.actions.view')}</span>
-          </div>
+            ${localize('wiser.actions.view')}
+          </ha-button>
         </td>
       </tr>
     `;
@@ -185,7 +188,10 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
     if (allow_edit(this.hass!, this.config!)) {
       return html`
         <div class="card-actions">
-          <mwc-button @click=${this._addScheduleClick}>${localize('wiser.actions.add_schedule')} </mwc-button>
+          <ha-button
+            appearance="plain"
+            @click=${this._addScheduleClick}>${localize('wiser.actions.add_schedule')}
+          </ha-button>
         </div>
       `;
     }
@@ -231,10 +237,6 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
       border-radius: 5px;
       font-size: small;
     }
-    div.schedule-item ha-icon {
-      float: left;
-      cursor: pointer;
-    }
     .schedule-id {
       width: 30px;
       text-align: right;
@@ -255,7 +257,6 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
       text-align: center;
       padding-left: 5px;
     }
-
     div.table-header {
       display: flex;
       font-weight: 500;
@@ -285,19 +286,9 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
       position: relative;
     }
     .schedule-item {
-      line-height: 32px;
-      cursor: pointer;
       white-space: nowrap;
       text-overflow: ellipsis;
-      margin: 5px 10px 5px 0px;
-      display: flex;
-      padding: 2px 10px 2px 5px;
-      color: var(--mdc-theme-primary, #6200ee);
-      background: var(--primary-color);
-      --mdc-theme-primary: var(--text-primary-color);
-      border-radius: 4px;
-      font-size: var(--material-button-font-size);
-      position: relative;
+      padding: 5px 5px;
     }
     .badge {
       font-size: 13px;
@@ -305,8 +296,8 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
       position: absolute;
       min-width: 20px;
       box-sizing: border-box;
-      top: -5px;
-      right: -8px;
+      top: 0px;
+      right: 0px;
       background-color: var(--accent-color);
       border-radius: 50%;
       line-height: 20px;

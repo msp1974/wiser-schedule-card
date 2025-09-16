@@ -68,7 +68,12 @@ export class ScheduleCopyCard extends LitElement {
           </div>
         </div>
         <div class="card-actions">
-          <mwc-button @click=${this.cancelClick}> ${this.hass.localize('ui.common.cancel')} </mwc-button>
+          <ha-button
+            appearance="plain"
+            @click=${this.cancelClick}
+          > 
+            ${this.hass.localize('ui.common.cancel')}
+          </ha-button>
         </div>
       </ha-card>
     `;
@@ -76,12 +81,18 @@ export class ScheduleCopyCard extends LitElement {
 
   renderScheduleButtons(schedule: ScheduleListItem): TemplateResult {
     return html`
-      <mwc-button id=${schedule.Id} @click=${this._copySchedule} .value=${schedule.Name}>
+      <ha-button
+        class="schedule-button"
+        id=${schedule.Id} 
+        size="small"
+        @click=${this._copySchedule} 
+        .value=${schedule.Name}
+      >
         ${this._copy_in_progress == schedule.Id
           ? html`<span class="waiting"><ha-circular-progress active size="small"></ha-circular-progress></span>`
           : null}
         ${schedule.Name}
-      </mwc-button>
+      </ha-button>
     `;
   }
 
@@ -125,24 +136,12 @@ export class ScheduleCopyCard extends LitElement {
         margin: 20px 0 0 0;
         width: 100%;
       }
-      ha-icon-button {
-        --mdc-icon-button-size: 36px;
-        margin-top: -6px;
-        margin-left: -6px;
-      }
-      .card-header ha-icon-button {
-        position: absolute;
-        right: 6px;
-        top: 6px;
-      }
-      mwc-button.active {
-        background: var(--primary-color);
-        --mdc-theme-primary: var(--text-primary-color);
-        border-radius: 4px;
-      }
       .sub-heading {
         padding-bottom: 10px;
         font-weight: 500;
+      }
+      .schedule-button {
+        padding: 5px;
       }
       span.waiting {
         position: absolute;

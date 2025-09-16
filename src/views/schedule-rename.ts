@@ -64,12 +64,12 @@ export class ScheduleRenameCard extends LitElement {
         </ha-textfield>
       </div>
       <div class="card-actions">
-        <mwc-button style="float: right" .disabled=${this._newScheduleName ? false : true} @click=${this.confirmClick}>
+        <ha-button appearance="plain" style="float: right" .disabled=${this._newScheduleName ? false : true} @click=${this.confirmClick}>
           ${this._rename_in_progress
             ? html`<span class="waiting"><ha-circular-progress active size="small"></ha-circular-progress></span>`
             : this.hass!.localize('ui.common.save')}
-        </mwc-button>
-        <mwc-button @click=${this.cancelClick}> ${this.hass!.localize('ui.common.cancel')} </mwc-button>
+        </ha-button>
+        <ha-button appearance="plain" @click=${this.cancelClick}> ${this.hass!.localize('ui.common.cancel')} </ha-button>
       </div>
     `;
   }
@@ -109,6 +109,9 @@ export class ScheduleRenameCard extends LitElement {
       div.wrapper {
         color: var(--primary-text-color);
         padding: 5px 0;
+      }
+      .card-actions {
+        padding-top: 8px;
       }
       .schedule-type-select {
         margin: 20px 0 0 0;

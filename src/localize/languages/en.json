@@ -48,7 +48,7 @@
       "schedule_type": "Schedule Type",
       "schedule_id": "Schedule Id",
       "schedule_name": "Schedule Name",
-      "schedule_assignment": "Schedule Assignment",
+      "schedule_assignment": "Room/Device Assignment",
       "not_assigned": "(Not Assigned)",
       "rename_schedule": "Rename Schedule",
       "copy_schedule": "Copy Schedule",
@@ -56,7 +56,7 @@
     },
     "helpers": {
       "enter_new_name": "Enter the new name for the Schedule",
-      "select_copy_schedule": "Select the schedule below to copy to",
+      "select_copy_schedule": "Select the schedule to copy to",
       "delete_schedule_confirm": "Are you sure you wish to delete the schedule",
       "select_a_schedule": "Select a schedule to view",
       "add_schedule": "Select the schedule type and enter a name for the schedule to create"

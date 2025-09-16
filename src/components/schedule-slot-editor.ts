@@ -231,14 +231,14 @@ export class ScheduleSlotEditor extends LitElement {
         <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
         <div class="sub-section">
           <div class="sub-heading">Set Special Time</div>
-          <mwc-button id=${'sunrise'} @click=${this._setSpecialTime} ?disabled=${!slot}>
+          <ha-button id=${'sunrise'} @click=${this._setSpecialTime} ?disabled=${!slot}>
             <ha-icon id=${'sunrise'} icon="hass:weather-sunny" class="padded-right"></ha-icon>
             Sunrise
-          </mwc-button>
-          <mwc-button id=${'sunset'} @click=${this._setSpecialTime} ?disabled=${!slot}>
+          </ha-button>
+          <ha-button id=${'sunset'} @click=${this._setSpecialTime} ?disabled=${!slot}>
             <ha-icon id=${'sunset'} icon="hass:weather-night" class="padded-right"></ha-icon>
             Sunset
-          </mwc-button>
+          </ha-button>
         </div>
       </div>
     `;
@@ -255,14 +255,14 @@ export class ScheduleSlotEditor extends LitElement {
       <div class="wrapper" style="white-space: normal;">
         <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
         <div class="sub-section">
-          <mwc-button @click=${this._addSlot} ?disabled=${this._activeSlot < -1 || slotCount >= 24}>
-            <ha-icon icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
+          <ha-button size="small" style="padding: 0 2px" @click=${this._addSlot} .disabled=${this._activeSlot < -1 || slotCount >= 24}>
+            <ha-icon slot="start" icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
             ${localize('wiser.actions.add')}
-          </mwc-button>
-          <mwc-button @click=${this._removeSlot} ?disabled=${this._activeSlot < 0 || slotCount < 1}>
-            <ha-icon icon="hass:minus-circle-outline" class="padded-right"></ha-icon>
+          </ha-button>
+          <ha-button size="small" style="padding: 0 2px" @click=${this._removeSlot} .disabled=${this._activeSlot < 0 || slotCount < 1}>
+            <ha-icon slot="start" icon="hass:minus-circle-outline" class="padded-right"></ha-icon>
             ${this.hass!.localize('ui.common.delete')}
-          </mwc-button>
+          </ha-button>
         </div>
       </div>
     `;
@@ -392,11 +392,11 @@ export class ScheduleSlotEditor extends LitElement {
 
   renderCopyToButton(day: string): TemplateResult {
     return html`
-      <mwc-button id=${day} @click=${this._copyDay} ?disabled=${this._activeDay == day || !this._activeDay}>
+      <ha-button id=${day} appearance="plain" size="small" @click=${this._copyDay} ?disabled=${this._activeDay == day || !this._activeDay}>
         ${days.includes(day) && this._show_short_days
           ? localize('wiser.days.short.' + day.toLowerCase())
           : localize('wiser.days.' + day.toLowerCase())}
-      </mwc-button>
+      </ha-button>
     `;
   }
 
