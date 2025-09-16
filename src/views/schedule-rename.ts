@@ -64,12 +64,19 @@ export class ScheduleRenameCard extends LitElement {
         </ha-textfield>
       </div>
       <div class="card-actions">
-        <ha-button appearance="plain" style="float: right" .disabled=${this._newScheduleName ? false : true} @click=${this.confirmClick}>
+        <ha-button
+          appearance="plain"
+          style="float: right"
+          .disabled=${this._newScheduleName ? false : true}
+          @click=${this.confirmClick}
+        >
           ${this._rename_in_progress
             ? html`<span class="waiting"><ha-circular-progress active size="small"></ha-circular-progress></span>`
             : this.hass!.localize('ui.common.save')}
         </ha-button>
-        <ha-button appearance="plain" @click=${this.cancelClick}> ${this.hass!.localize('ui.common.cancel')} </ha-button>
+        <ha-button appearance="plain" @click=${this.cancelClick}>
+          ${this.hass!.localize('ui.common.cancel')}
+        </ha-button>
       </div>
     `;
   }
@@ -103,7 +110,9 @@ export class ScheduleRenameCard extends LitElement {
     return css`
       div.wrapper {
         white-space: nowrap;
-        transition: width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67), margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        transition:
+          width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67),
+          margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
         overflow: auto;
       }
       div.wrapper {

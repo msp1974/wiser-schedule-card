@@ -23,13 +23,14 @@ export class DialogError extends LitElement {
   render(): TemplateResult {
     if (!this._params) return html``;
     return html`
-      <ha-dialog open .heading=${this._params.title || this.hass.localize('state_badge.default.error')} @closed=${this.closeDialog} @close-dialog=${this.closeDialog}>
+      <ha-dialog
+        open
+        .heading=${this._params.title || this.hass.localize('state_badge.default.error')}
+        @closed=${this.closeDialog}
+        @close-dialog=${this.closeDialog}
+      >
         <div class="wrapper">${this._params.error || ''}</div>
-        <ha-button 
-          slot="primaryAction" 
-          style="float: left" 
-          @click=${this.closeDialog} 
-          dialogAction="close">
+        <ha-button slot="primaryAction" style="float: left" @click=${this.closeDialog} dialogAction="close">
           ${this.hass.localize('ui.dialogs.generic.ok')}
         </ha-button>
       </ha-dialog>

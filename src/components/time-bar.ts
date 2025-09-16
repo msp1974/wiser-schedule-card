@@ -62,7 +62,9 @@ export class TimeBar extends LitElement {
       }
       div.time-wrapper {
         white-space: nowrap;
-        transition: width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67), margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        transition:
+          width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67),
+          margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
         overflow: auto;
       }
       div.time-wrapper div {

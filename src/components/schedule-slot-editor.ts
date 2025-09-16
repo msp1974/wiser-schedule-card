@@ -255,11 +255,21 @@ export class ScheduleSlotEditor extends LitElement {
       <div class="wrapper" style="white-space: normal;">
         <div class="day  ${this._show_short_days ? 'short' : ''}">&nbsp;</div>
         <div class="sub-section">
-          <ha-button size="small" style="padding: 0 2px" @click=${this._addSlot} .disabled=${this._activeSlot < -1 || slotCount >= 24}>
+          <ha-button
+            size="small"
+            style="padding: 0 2px"
+            @click=${this._addSlot}
+            .disabled=${this._activeSlot < -1 || slotCount >= 24}
+          >
             <ha-icon slot="start" icon="hass:plus-circle-outline" class="padded-right"></ha-icon>
             ${localize('wiser.actions.add')}
           </ha-button>
-          <ha-button size="small" style="padding: 0 2px" @click=${this._removeSlot} .disabled=${this._activeSlot < 0 || slotCount < 1}>
+          <ha-button
+            size="small"
+            style="padding: 0 2px"
+            @click=${this._removeSlot}
+            .disabled=${this._activeSlot < 0 || slotCount < 1}
+          >
             <ha-icon slot="start" icon="hass:minus-circle-outline" class="padded-right"></ha-icon>
             ${this.hass!.localize('ui.common.delete')}
           </ha-button>
@@ -392,7 +402,13 @@ export class ScheduleSlotEditor extends LitElement {
 
   renderCopyToButton(day: string): TemplateResult {
     return html`
-      <ha-button id=${day} appearance="plain" size="small" @click=${this._copyDay} ?disabled=${this._activeDay == day || !this._activeDay}>
+      <ha-button
+        id=${day}
+        appearance="plain"
+        size="small"
+        @click=${this._copyDay}
+        ?disabled=${this._activeDay == day || !this._activeDay}
+      >
         ${days.includes(day) && this._show_short_days
           ? localize('wiser.days.short.' + day.toLowerCase())
           : localize('wiser.days.' + day.toLowerCase())}
@@ -737,7 +753,9 @@ export class ScheduleSlotEditor extends LitElement {
       div.wrapper,
       div.time-wrapper {
         white-space: nowrap;
-        transition: width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67), margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        transition:
+          width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67),
+          margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
         display: flex;
       }
       div.sub-section {

@@ -25,7 +25,12 @@ export class DialogDeleteConfirm extends LitElement {
   render() {
     if (!this._params) return html``;
     return html`
-      <ha-dialog open .heading=${localize('wiser.headings.delete_schedule')} @closed=${this.closeDialog} @close-dialog=${this.closeDialog}>
+      <ha-dialog
+        open
+        .heading=${localize('wiser.headings.delete_schedule')}
+        @closed=${this.closeDialog}
+        @close-dialog=${this.closeDialog}
+      >
         <div class="wrapper">${localize('wiser.helpers.delete_schedule_confirm') + ' ' + this._params.name + '?'}</div>
         <ha-button
           variant="danger"
@@ -36,11 +41,7 @@ export class DialogDeleteConfirm extends LitElement {
         >
           ${this.hass.localize('ui.common.delete')}
         </ha-button>
-        <ha-button 
-          slot="secondaryAction" 
-          @click=${this.cancelClick} 
-          dialogAction="close"
-        >
+        <ha-button slot="secondaryAction" @click=${this.cancelClick} dialogAction="close">
           ${this.hass.localize('ui.common.cancel')}
         </ha-button>
       </ha-dialog>

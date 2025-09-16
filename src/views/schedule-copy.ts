@@ -83,9 +83,9 @@ export class ScheduleCopyCard extends LitElement {
     return html`
       <ha-button
         class="schedule-button"
-        id=${schedule.Id} 
+        id=${schedule.Id}
         size="small"
-        @click=${this._copySchedule} 
+        @click=${this._copySchedule}
         .value=${schedule.Name}
       >
         ${this._copy_in_progress == schedule.Id
@@ -117,7 +117,9 @@ export class ScheduleCopyCard extends LitElement {
     return css`
       div.wrapper {
         white-space: nowrap;
-        transition: width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67), margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        transition:
+          width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67),
+          margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
         overflow: auto;
       }
       div.card-actions {

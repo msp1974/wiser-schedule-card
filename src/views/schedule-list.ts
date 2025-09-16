@@ -114,10 +114,10 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
               ${this.config?.view_type == 'list'
                 ? this.renderScheduleList(filtered_schedule_list)
                 : this.config?.show_schedule_id
-                ? filtered_schedule_list
-                    .sort((a, b) => a.Id - b.Id)
-                    .map((schedule) => this.renderScheduleItem(schedule))
-                : filtered_schedule_list.map((schedule) => this.renderScheduleItem(schedule))}
+                  ? filtered_schedule_list
+                      .sort((a, b) => a.Id - b.Id)
+                      .map((schedule) => this.renderScheduleItem(schedule))
+                  : filtered_schedule_list.map((schedule) => this.renderScheduleItem(schedule))}
             </div>
           </fieldset>
         </div>
@@ -146,7 +146,6 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
     }
     return html``;
   }
-
 
   renderScheduleItem(schedule: ScheduleListItem): TemplateResult | void {
     const icon = ScheduleIcons[schedule.Type];
@@ -188,9 +187,8 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
     if (allow_edit(this.hass!, this.config!)) {
       return html`
         <div class="card-actions">
-          <ha-button
-            appearance="plain"
-            @click=${this._addScheduleClick}>${localize('wiser.actions.add_schedule')}
+          <ha-button appearance="plain" @click=${this._addScheduleClick}
+            >${localize('wiser.actions.add_schedule')}
           </ha-button>
         </div>
       `;
@@ -221,7 +219,9 @@ export class ScheduleListCard extends SubscribeMixin(LitElement) {
     }
     div.wrapper {
       white-space: nowrap;
-      transition: width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67), margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+      transition:
+        width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67),
+        margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
       overflow: auto;
       display: flex;
       flex-wrap: wrap;

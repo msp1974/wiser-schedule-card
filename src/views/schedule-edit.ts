@@ -282,10 +282,10 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 
   renderEntityButton(entity: Entities, active: boolean): TemplateResult | void {
     return html`
-      <ha-button 
+      <ha-button
         id=${entity.Id}
         class=${active ? 'active' : ''}
-        appearance=${active ? 'accent' : 'plain'} 
+        appearance=${active ? 'accent' : 'plain'}
         size="small"
         @click=${this.entityAssignmentClick}
       >
@@ -333,25 +333,19 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 
   renderBackButton(): TemplateResult | void {
     return html`
-      <ha-button
-        appearance="plain"
-        @click=${this.backClick}>${this.hass!.localize('ui.common.back')}
-      </ha-button> `;
+      <ha-button appearance="plain" @click=${this.backClick}>${this.hass!.localize('ui.common.back')} </ha-button>
+    `;
   }
 
   renderCancelButton(): TemplateResult | void {
     return html`
-      <ha-button 
-        appearance="plain"
-        @click=${this.cancelClick}>${this.hass!.localize('ui.common.cancel')}
-      </ha-button> `;
+      <ha-button appearance="plain" @click=${this.cancelClick}>${this.hass!.localize('ui.common.cancel')} </ha-button>
+    `;
   }
 
   renderScheduleRenameButton(): TemplateResult {
     return html`
-      <ha-button 
-        class="schedule-action-button"
-        @click=${this.renameScheduleClick}>
+      <ha-button class="schedule-action-button" @click=${this.renameScheduleClick}>
         ${localize('wiser.actions.rename')}
       </ha-button>
     `;
@@ -372,11 +366,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 
   renderCopyScheduleButton(): TemplateResult | void {
     return html`
-      <ha-button
-        class="schedule-action-button"
-        .disabled=${this.schedule_id == 1000}
-        @click=${this.copyClick}
-      >
+      <ha-button class="schedule-action-button" .disabled=${this.schedule_id == 1000} @click=${this.copyClick}>
         ${localize('wiser.actions.copy')}
       </ha-button>
     `;
@@ -384,21 +374,15 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
 
   renderEditScheduleButton(): TemplateResult | void {
     return html`
-      <ha-button 
-        class="schedule-action-button"
-        @click=${this.editClick}
-      >
-        ${this.hass!.localize('ui.common.edit')} 
+      <ha-button class="schedule-action-button" @click=${this.editClick}>
+        ${this.hass!.localize('ui.common.edit')}
       </ha-button>
     `;
   }
 
   renderFilesScheduleButton(): TemplateResult | void {
     return html`
-      <ha-button 
-        class="schedule-action-button"
-        @click=${this.filesClick}
-      > 
+      <ha-button class="schedule-action-button" @click=${this.filesClick}>
         ${localize('wiser.actions.files')}
       </ha-button>
     `;
@@ -407,11 +391,7 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
   renderSaveScheduleButton(): TemplateResult | void {
     if (allow_edit(this.hass!, this.config)) {
       return html`
-        <ha-button
-          appearance="plain"
-          style="float: right"
-          @click=${this.saveClick}
-        >
+        <ha-button appearance="plain" style="float: right" @click=${this.saveClick}>
           ${this._save_in_progress
             ? html`<ha-circular-progress active size="small"></ha-circular-progress>`
             : this.hass!.localize('ui.common.save')}
@@ -537,7 +517,9 @@ export class SchedulerEditCard extends SubscribeMixin(LitElement) {
       div.wrapper,
       div.time-wrapper {
         white-space: nowrap;
-        transition: width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67), margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+        transition:
+          width 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67),
+          margin 0.2s cubic-bezier(0.17, 0.67, 0.83, 0.67);
       }
       div.assignment-wrapper,
       div.actions-wrapper {
